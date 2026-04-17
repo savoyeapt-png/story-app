@@ -342,8 +342,8 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .manu-ep-badge{font-family:var(--font-m);font-size:11px;color:var(--ink3);background:var(--bg3);border:1px solid var(--rule);border-radius:3px;padding:1px 8px;}
 .manu-title-inp{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-s);font-size:13px;font-weight:600;color:var(--ink);}
 /* 분리된 2칸 레이아웃 */
-.manu-panels{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--rule);}
-.manu-panel{display:flex;flex-direction:column;}
+.manu-panels{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--rule);align-items:start;}
+.manu-panel{display:flex;flex-direction:column;min-width:0;min-height:0;}
 .manu-panel+.manu-panel{border-left:1px solid var(--rule);}
 .manu-panel-label{
   padding:6px 12px;background:var(--bg3);border-bottom:1px solid var(--rule);
@@ -354,16 +354,28 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .manu-panel-label span:hover{color:var(--ink);}
 .manu-preview{
   padding:12px 14px;font-family:var(--font-s);font-size:12.5px;color:var(--ink2);
-  line-height:1.9;overflow-y:auto;max-height:240px;white-space:pre-wrap;word-break:break-all;
-  flex:1;
+  line-height:1.9;overflow:auto;white-space:pre-wrap;word-break:break-all;
+  flex:0 0 auto;min-height:160px;height:260px;resize:none;
 }
 .manu-preview::-webkit-scrollbar{width:3px;}
 .manu-preview::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px;}
 .manu-write-ta{
-  width:100%;flex:1;background:transparent;border:none;outline:none;
+  width:100%;background:transparent;border:none;outline:none;
   font-family:var(--font-s);font-size:13px;color:var(--ink);
-  resize:none;line-height:1.9;padding:12px 14px;min-height:180px;
+  line-height:1.9;padding:12px 14px;overflow:auto;
+  flex:0 0 auto;min-height:220px;height:360px;resize:none;
 }
+.manu-vsplitter{
+  height:14px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  background:var(--bg2);cursor:row-resize;position:relative;flex:0 0 auto;
+}
+.manu-vsplitter:hover{background:var(--bg3);}
+.manu-vsplitter::before{
+  content:'↕ 높이 조절';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:9px;font-family:var(--font-m);letter-spacing:.08em;color:var(--ink4);white-space:nowrap;
+}
+body.manu-resizing,
+body.manu-resizing *{cursor:row-resize !important;user-select:none !important;}
 .manu-wordcount{padding:5px 12px;border-top:1px solid var(--rule);font-size:10px;font-family:var(--font-m);color:var(--ink4);background:var(--bg2);text-align:right;}
 /* 원고 집필칸 하단 액션바 */
 .manu-write-footer{
@@ -409,8 +421,10 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .archive-item:last-child{border-bottom:none;}
 .archive-item-time{font-family:var(--font-m);font-size:10px;color:var(--ink4);min-width:80px;}
 .archive-item-preview{font-family:var(--font-s);font-size:11px;color:var(--ink3);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.archive-item-restore{font-size:10px;color:var(--ink4);cursor:pointer;padding:2px 7px;border:1px solid var(--rule);border-radius:3px;transition:all .1s;font-family:var(--font-n);}
+.archive-item-actions{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.archive-item-restore,.archive-item-delete{font-size:10px;color:var(--ink4);cursor:pointer;padding:2px 7px;border:1px solid var(--rule);border-radius:3px;transition:all .1s;font-family:var(--font-n);background:transparent;}
 .archive-item-restore:hover{border-color:var(--ink);color:var(--ink);}
+.archive-item-delete:hover{border-color:#c0392b;color:#c0392b;}
 
 /* ═══ FILE UPLOAD ═══ */
 .file-drop-zone{border:1.5px dashed var(--rule2);border-radius:6px;padding:22px;text-align:center;cursor:pointer;transition:all .15s;color:var(--ink4);font-size:12px;}
@@ -497,21 +511,40 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .wm-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 36px 0;}
 .wm-title{width:280px;padding:8px 10px;border:1px solid var(--rule);border-radius:var(--r);background:var(--bg);font-family:var(--font-s);font-size:13px;color:var(--ink);outline:none;}
 .wm-title:focus{border-color:var(--ink);}
-.wm-grid{display:grid;grid-template-columns:1.35fr .95fr;gap:18px;padding:0 36px 28px;min-height:0;flex:1;}
-.wm-editor-card,.wm-side-card{border:1px solid var(--rule);border-radius:6px;background:var(--bg);display:flex;flex-direction:column;min-height:0;}
-.wm-head{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px;}
+#page-writing-mode{min-height:0;overflow:hidden;}
+.wm-grid{display:grid;grid-template-columns:1.35fr .95fr;gap:18px;padding:0 36px 28px;min-height:0;flex:1;height:calc(100vh - 240px);max-height:calc(100vh - 240px);overflow:hidden;}
+.wm-editor-card,.wm-side-card{border:1px solid var(--rule);border-radius:6px;background:var(--bg);display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden;}
+.wm-head{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .wm-head-title{font-size:11px;font-family:var(--font-m);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;}
 .wm-meta{margin-left:auto;font-size:10px;font-family:var(--font-m);color:var(--ink4);}
-.wm-editor{flex:1;min-height:380px;border:none;outline:none;resize:none;background:transparent;padding:16px 18px;font-family:var(--font-s);font-size:14px;line-height:1.9;color:var(--ink);}
-.wm-actions{padding:10px 14px;border-top:1px solid var(--rule);display:flex;align-items:center;gap:8px;background:var(--bg2);flex-wrap:wrap;}
+.wm-head-tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.wm-head-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.wm-head-save{font-size:10px;color:var(--ink4);font-family:var(--font-m);}
+
+.wm-editor{flex:1;min-height:0;height:100%;border:none;outline:none;resize:none;background:transparent;padding:16px 18px;font-family:var(--font-s);font-size:14px;line-height:1.9;color:var(--ink);overflow-y:auto;}
+.wm-actions{display:none;}
 .wm-subnote{font-size:10px;color:var(--ink4);font-family:var(--font-m);}
-.wm-analysis{padding:14px 16px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px;}
+.wm-analysis{padding:14px 16px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
 .wm-analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .wm-kv{padding:10px 12px;background:var(--bg2);border:1px solid var(--rule);border-radius:4px;}
 .wm-k{font-size:9px;font-family:var(--font-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:5px;}
 .wm-v{font-size:12px;line-height:1.7;color:var(--ink2);}
-.wm-card-list{padding:12px 14px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0;}
+.wm-card-list{padding:12px 14px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0;flex:1;}
 .wm-episode-card{border:1px solid var(--rule);border-radius:6px;background:var(--bg2);padding:10px 12px;display:flex;flex-direction:column;gap:6px;}
+.wm-episode-card.collapsed .wm-ep-text{
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.wm-episode-card.collapsed .wm-ep-meta{display:none;}
+@media (max-width: 1100px){
+  #page-writing-mode{overflow:auto;}
+  .wm-grid{grid-template-columns:1fr;height:auto;max-height:none;overflow:visible;}
+  .wm-editor-card,.wm-side-card{height:auto;min-height:420px;}
+}
+.wm-collapse-btn{margin-right:auto;}
+
 .wm-episode-top{display:flex;align-items:flex-start;gap:8px;}
 .wm-ep-badge{font-size:10px;font-family:var(--font-m);color:var(--ink3);background:var(--bg3);border:1px solid var(--rule);border-radius:3px;padding:1px 6px;flex-shrink:0;}
 .wm-ep-title{font-size:13px;font-family:var(--font-s);font-weight:600;color:var(--ink);flex:1;line-height:1.4;}
@@ -522,6 +555,34 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .wm-mini-btn{padding:4px 10px;border:1px solid var(--rule2);border-radius:3px;background:transparent;cursor:pointer;font-size:10px;font-family:var(--font-n);color:var(--ink3);}
 .wm-mini-btn:hover{border-color:var(--ink);color:var(--ink);}
 .wm-empty{padding:18px;border:1px dashed var(--rule2);border-radius:6px;color:var(--ink4);font-size:12px;line-height:1.7;text-align:center;background:var(--bg2);}
+
+
+/* ═══ ANALYSIS PROMPT PRESETS ═══ */
+.prompt-preset-box{padding:14px 16px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);display:flex;flex-direction:column;gap:10px;}
+.prompt-preset-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.prompt-select{min-width:240px;padding:7px 10px;background:var(--bg);border:1px solid var(--rule);border-radius:4px;font-size:12px;font-family:var(--font-m);color:var(--ink);outline:none;}
+.prompt-select:focus{border-color:var(--ink);}
+.prompt-helper{font-size:11px;color:var(--ink3);line-height:1.7;}
+.prompt-editor{min-height:220px;font-family:var(--font-s);font-size:12px;line-height:1.75;white-space:pre-wrap;}
+.scope-preview-box{padding:12px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);font-size:11px;color:var(--ink3);line-height:1.7;}
+.scope-preview-box strong{color:var(--ink);}
+
+
+
+/* ═══ FEEDBACK LOOP ═══ */
+.wm-feedback{padding:14px 16px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,var(--bg),var(--bg2));flex-shrink:0;}
+.wm-feedback-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.wm-feedback-title{font-size:11px;font-family:var(--font-m);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;}
+.wm-feedback-actions{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;}
+.wm-feedback-editor{min-height:110px;max-height:180px;font-family:var(--font-s);font-size:12px;line-height:1.75;}
+.wm-feedback-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.wm-feedback-card{padding:10px 12px;background:var(--bg);border:1px solid var(--rule);border-radius:6px;min-height:92px;}
+.wm-feedback-card.full{grid-column:1 / -1;}
+.wm-feedback-card ul{margin:0;padding-left:18px;}
+.wm-feedback-card li{margin:0 0 4px 0;font-size:12px;line-height:1.65;color:var(--ink2);}
+.wm-feedback-empty{font-size:11px;color:var(--ink4);line-height:1.6;}
+.wm-feedback-rewrite{white-space:pre-wrap;font-size:12px;line-height:1.75;color:var(--ink2);}
+@media (max-width: 980px){.wm-feedback-grid{grid-template-columns:1fr;}}
 
 /* ═══ EXPORT MODAL ═══ */
 #export-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
@@ -565,6 +626,10 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .canvas-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
 .canvas-area{position:absolute;min-width:260px;min-height:180px;border:1.5px dashed var(--rule2);border-radius:10px;background:rgba(255,255,255,.22);padding:12px;cursor:move;}
 .canvas-area-title{font-family:var(--font-m);font-size:11px;color:var(--ink3);background:transparent;border:none;outline:none;width:100%;font-weight:600;letter-spacing:.04em;}
+.canvas-area-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.canvas-area-title{flex:1;}
+.canvas-area-del{flex:0 0 auto;border:1px solid var(--rule2);background:rgba(255,255,255,.72);color:var(--ink4);border-radius:4px;padding:2px 8px;font-size:10px;font-family:var(--font-m);cursor:pointer;line-height:1.4;}
+.canvas-area-del:hover{border-color:#c0392b;color:#c0392b;background:#fff;}
 .canvas-note{position:absolute;width:220px;min-height:160px;border:1px solid var(--rule2);border-radius:8px;background:#fff8bf;box-shadow:0 8px 24px rgba(0,0,0,.08);cursor:move;display:flex;flex-direction:column;}
 .canvas-note[data-kind="romance"]{background:#fde8e8;border-color:#e87070;}
 .canvas-note[data-kind="conflict"]{background:#e8ecfd;border-color:#5070d8;}
@@ -898,6 +963,234 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
 .hash-jump-option-title{font-size:12px; font-weight:700; margin-bottom:3px;}
 .hash-jump-option-sub{font-size:11px; color:rgba(255,255,255,.68); line-height:1.5;}
 
+
+
+/* === v2.1 nav reorder + guide + legacy relation map hidden === */
+#rel-svg-container{display:none !important;}
+.guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+.guide-card{border:1px solid var(--rule);border-radius:8px;background:var(--bg);overflow:hidden;}
+.guide-card-head{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--rule);font-family:var(--font-m);font-size:11px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;}
+.guide-card-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;line-height:1.8;color:var(--ink2);font-size:12px;}
+.guide-card-body strong{color:var(--ink);}
+.guide-steps{display:flex;flex-direction:column;gap:8px;counter-reset:guide;}
+.guide-step{display:flex;gap:10px;align-items:flex-start;}
+.guide-step::before{counter-increment:guide;content:counter(guide);flex:0 0 20px;height:20px;border-radius:999px;background:var(--ink);color:var(--bg);font-family:var(--font-m);font-size:10px;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.guide-inline-code{font-family:var(--font-m);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--ink2);}
+.guide-note-box{padding:12px 14px;border:1px dashed var(--rule2);border-radius:8px;background:var(--bg2);font-size:12px;line-height:1.8;color:var(--ink3);}
+
+/* ═══ TIMELINE STRUCTURE ═══ */
+.timeline-shell{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;min-height:0;flex:1;}
+.timeline-main{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.timeline-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.timeline-mode{display:flex;border:1px solid var(--rule2);border-radius:6px;overflow:hidden;}
+.timeline-mode button{padding:6px 12px;border:none;background:var(--bg);font-size:11px;font-family:var(--font-m);cursor:pointer;color:var(--ink3);}
+.timeline-mode button.active{background:var(--ink);color:var(--bg);}
+.timeline-board{border:1px solid var(--rule);border-radius:8px;background:var(--bg);min-height:520px;overflow:auto;padding:16px;}
+.timeline-arc-section{margin-bottom:22px;}
+.timeline-arc-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.timeline-arc-pill{font-size:10px;font-family:var(--font-m);padding:3px 10px;border-radius:999px;background:var(--bg2);color:var(--ink2);border:1px solid var(--rule);}
+.timeline-arc-line{flex:1;height:1px;background:var(--rule);}
+.timeline-arc-count{font-size:10px;color:var(--ink4);font-family:var(--font-m);}
+.timeline-drop-zone{display:flex;flex-direction:column;gap:8px;min-height:48px;}
+.timeline-card{border:1px solid var(--rule);border-left:3px solid var(--ink);border-radius:8px;background:var(--bg);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;}
+.timeline-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.timeline-card.selected{box-shadow:0 0 0 2px var(--ink);} 
+.timeline-card.dragging{opacity:.45;} .timeline-card.drag-over{box-shadow:0 -2px 0 0 var(--ink);} 
+.timeline-card .drag-handle{cursor:grab;color:var(--ink4);font-size:14px;user-select:none;padding-top:1px;}
+.timeline-ep{font-size:10px;font-family:var(--font-m);color:var(--ink4);background:var(--bg2);border:1px solid var(--rule);border-radius:3px;padding:2px 7px;min-width:52px;text-align:center;}
+.timeline-card-body{flex:1;min-width:0;}
+.timeline-card-title{font-size:13px;font-family:var(--font-s);font-weight:700;color:var(--ink);margin-bottom:5px;line-height:1.4;}
+.timeline-card-summary{font-size:11px;color:var(--ink3);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.timeline-char-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.timeline-char-tag{font-size:10px;font-family:var(--font-m);padding:2px 7px;border-radius:999px;background:var(--bg2);color:var(--ink3);}
+.timeline-add{width:100%;padding:10px;border:1px dashed var(--rule2);border-radius:6px;background:transparent;color:var(--ink4);font-size:11px;font-family:var(--font-m);cursor:pointer;}
+.timeline-add:hover{border-color:var(--ink);color:var(--ink);background:var(--bg2);} 
+.timeline-arc-pill-input{min-width:88px;max-width:180px;padding:4px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--bg);font-size:10px;font-family:var(--font-m);color:var(--ink2);outline:none;}
+.timeline-arc-pill-input:focus{border-color:var(--ink);}
+.timeline-arc-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.timeline-arc-del{padding:2px 7px;border:1px solid var(--rule);border-radius:999px;background:transparent;font-size:10px;font-family:var(--font-m);color:var(--ink4);cursor:pointer;}
+.timeline-arc-del:hover{border-color:#c0392b;color:#c0392b;}
+.timeline-side{border:1px solid var(--rule);border-radius:8px;background:var(--bg);display:flex;flex-direction:column;min-height:520px;overflow:hidden;}
+.timeline-side-head{padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--bg2);font-size:11px;font-family:var(--font-m);color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+.timeline-side-body{padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0;}
+.timeline-empty{padding:26px 12px;color:var(--ink4);text-align:center;line-height:1.7;font-size:12px;}
+.timeline-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.timeline-view-horizontal .timeline-board{overflow:auto;}
+.timeline-h-row{display:flex;gap:0;min-width:max-content;align-items:stretch;}
+.timeline-h-col{display:flex;flex-direction:column;border-right:1px solid var(--rule);min-width:260px;}
+.timeline-h-col:last-child{border-right:none;}
+.timeline-h-head{padding:8px 12px;border-bottom:1px solid var(--rule);background:var(--bg2);font-size:11px;font-family:var(--font-m);color:var(--ink2);}
+.timeline-h-cards{display:flex;flex-direction:column;gap:8px;padding:10px;}
+.timeline-h-card{border:1px solid var(--rule);border-radius:6px;background:var(--bg);padding:8px 10px;cursor:pointer;}
+.timeline-h-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.05);} .timeline-h-card.selected{box-shadow:0 0 0 2px var(--ink);} 
+.timeline-link-chip{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(29,78,216,.10);border:1px solid rgba(29,78,216,.22);color:#1d4ed8;font-size:10px;font-family:var(--font-m);} 
+.frag-source-badge{margin-left:6px;display:inline-block;padding:2px 6px;border-radius:999px;background:rgba(29,78,216,.09);color:#1d4ed8;font-size:9px;font-family:var(--font-m);border:1px solid rgba(29,78,216,.2);} 
+@media (max-width:1100px){.timeline-shell{grid-template-columns:1fr;}.timeline-side{min-height:unset;}}
+
+
+/* === v8.1 writing card as source === */
+.wm-source-badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:999px;
+  background:rgba(16,185,129,.10);
+  color:#047857;
+  border:1px solid rgba(16,185,129,.22);
+  font-size:10px;
+  font-family:var(--font-m);
+}
+.timeline-link-chip.wm-link{
+  background:rgba(16,185,129,.10);
+  border-color:rgba(16,185,129,.22);
+  color:#047857;
+}
+.frag-source-badge.wm-source{
+  background:rgba(16,185,129,.10);
+  color:#047857;
+  border-color:rgba(16,185,129,.22);
+}
+
+
+/* === v8.2 manuscript multi-preview tabs === */
+.manu-panel-label-actions{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.manu-ref-btn{
+  padding:2px 8px;border:1px solid var(--rule2);border-radius:3px;background:transparent;
+  font-size:10px;font-family:var(--font-m);color:var(--ink3);cursor:pointer;
+}
+.manu-ref-btn:hover{border-color:var(--ink);color:var(--ink);}
+.manu-ref-tabs{
+  padding:8px 12px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:6px;background:var(--bg);
+}
+.manu-ref-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  border:1px solid var(--rule2);background:var(--bg2);font-size:10px;font-family:var(--font-m);color:var(--ink3);cursor:pointer;
+}
+.manu-ref-chip.active{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+.manu-ref-chip .x{opacity:.55;cursor:pointer}
+.manu-ref-chip .x:hover{opacity:1}
+.ref-type-frag{border-color:rgba(29,78,216,.25);color:#1d4ed8;background:rgba(29,78,216,.08);}
+.ref-type-wm{border-color:rgba(16,185,129,.24);color:#047857;background:rgba(16,185,129,.08);}
+.ref-type-manu{border-color:rgba(125,102,8,.24);color:#7D6608;background:rgba(254,249,231,1);}
+.ref-type-base{border-color:var(--rule2);color:var(--ink3);background:var(--bg3);}
+.ref-type-template{border-color:rgba(168,85,247,.28);color:#7c3aed;background:rgba(168,85,247,.08);}
+.ref-picker-item{padding:10px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);cursor:pointer;}
+.ref-picker-item:hover{border-color:var(--ink);background:var(--bg2);}
+.ref-picker-title{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.ref-picker-sub{font-size:11px;color:var(--ink3);line-height:1.6;}
+
+/* === v3.1 fragment duplicate hashtag preview cleanup === */
+.frag-card .hash-preview-wrap{display:none !important;}
+
+
+
+
+/* === character image uploader + relation board === */
+.char-head-avatar{
+  width:56px;height:72px;border-radius:8px;background:var(--bg3);border:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+  font-family:var(--font-s);font-size:20px;font-weight:700;color:var(--ink2);
+}
+.char-head-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.char-header-meta{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0;}
+.char-image-shell{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start;}
+.char-image-box{
+  width:120px;height:160px;border:1px dashed var(--rule2);border-radius:8px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+}
+.char-image-box img{width:100%;height:100%;object-fit:cover;display:block;}
+.char-image-placeholder{padding:10px;text-align:center;font-size:11px;color:var(--ink4);line-height:1.6;font-family:var(--font-m);}
+.char-image-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.char-mini-btn{
+  padding:5px 10px;border:1px solid var(--rule2);border-radius:4px;background:transparent;cursor:pointer;
+  font-size:11px;color:var(--ink3);font-family:var(--font-n);
+}
+.char-mini-btn:hover{border-color:var(--ink);color:var(--ink);}
+.rel-board-shell{
+  background:transparent;overflow:visible;
+}
+.rel-board-toolbar{
+  padding:10px 12px;border-bottom:1px solid var(--rule);background:var(--bg2);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.rel-board-canvas-wrap{
+  position:relative;
+  height:560px;
+  background:radial-gradient(circle at 1px 1px, rgba(0,0,0,.06) 1px, transparent 0);
+  background-size:24px 24px;
+  overflow:auto;
+  border:none;
+  border-radius:0;
+}
+.rel-board-stage{
+  position:relative;min-width:1400px;min-height:900px;
+}
+#rel-board-svg{
+  position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;
+}
+.rel-board-item{
+  position:absolute;
+  border:1px solid var(--rule2);
+  border-radius:10px;
+  background:var(--bg);
+  box-shadow:0 8px 20px rgba(0,0,0,.05);
+  cursor:move;
+  min-width:96px;
+  min-height:56px;
+  overflow:hidden;
+}
+.rel-board-item.selected{box-shadow:0 0 0 2px var(--ink);}
+.rel-board-char{
+  width:132px;
+  min-height:72px;
+  padding:8px 10px;
+  border-left:5px solid var(--ink);
+}
+.rel-board-char .name{font-family:var(--font-s);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px;line-height:1.3;word-break:keep-all;}
+.rel-board-char .meta{font-size:10px;color:var(--ink3);line-height:1.5;white-space:pre-wrap;}
+.rel-board-text{
+  width:180px;
+  min-height:100px;
+  padding:9px 10px;
+  border-left:5px solid #808080;
+  background:#fffefb;
+}
+.rel-board-text .title{font-size:9px;font-family:var(--font-m);letter-spacing:.08em;color:var(--ink4);text-transform:uppercase;margin-bottom:5px;}
+.rel-board-text .body{font-family:var(--font-s);font-size:11px;color:var(--ink2);line-height:1.65;white-space:pre-wrap;}
+.rel-board-item .rb-handle{position:absolute;right:8px;bottom:6px;font-size:12px;color:var(--ink4);pointer-events:none;}
+.rel-board-item .rb-resize-handle{
+  position:absolute;right:0;bottom:0;width:16px;height:16px;cursor:nwse-resize;z-index:3;
+  background:linear-gradient(135deg, transparent 0 42%, rgba(0,0,0,.18) 42% 50%, transparent 50% 62%, rgba(0,0,0,.18) 62% 70%, transparent 70%);
+}
+.rel-board-side{
+  display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:stretch;
+}
+.rel-board-editor{
+  border:1px solid var(--rule);border-radius:8px;background:var(--bg);overflow:hidden;
+  height:560px;display:flex;flex-direction:column;min-height:0;
+}
+.rel-board-editor-head{
+  padding:9px 12px;border-bottom:1px solid var(--rule);background:var(--bg2);font-size:10px;
+  font-family:var(--font-m);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;
+}
+.rel-board-editor-body{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;min-height:0;overflow:auto;}
+.rel-link-list{display:flex;flex-direction:column;gap:8px;}
+.rel-link-card{border:1px solid var(--rule);border-radius:8px;padding:10px;background:var(--bg);}
+.rel-link-top{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.rel-link-top strong{font-size:12px;color:var(--ink);}
+.rel-link-top span{font-size:10px;font-family:var(--font-m);color:var(--ink4);}
+.rel-link-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rel-pill{
+  padding:5px 10px;border:1px solid var(--rule2);border-radius:999px;background:var(--bg);
+  font-size:11px;font-family:var(--font-m);cursor:pointer;color:var(--ink3);
+}
+.rel-pill:hover{border-color:var(--ink);color:var(--ink);}
+.rel-board-note{font-size:11px;color:var(--ink4);font-family:var(--font-m);}
+@media (max-width:1080px){
+  .rel-board-side{grid-template-columns:1fr;}
+  .rel-board-editor{height:420px;}
+  .rel-board-canvas-wrap{height:420px;}
+}
+
 </style>
 </head>
 <body>
@@ -930,14 +1223,16 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
   <div class="nav-group">
     <div class="nav-group-label">작품 설계</div>
     <div class="nav-item active" data-page="overview"><span class="ni">◈</span>작품 개요</div>
+    <div class="nav-item" data-page="world"><span class="ni">○</span>세계관 · 규칙</div>
     <div class="nav-item" data-page="characters"><span class="ni">◉</span>캐릭터<span class="nav-badge" id="nb-char">0</span></div>
     <div class="nav-item" data-page="relations"><span class="ni">◎</span>관계 · 변화</div>
-    <div class="nav-item" data-page="world"><span class="ni">○</span>세계관 · 규칙</div>
   </div>
   <div class="nav-divider"></div>
   <div class="nav-group">
     <div class="nav-group-label">서사 구조</div>
     <div class="nav-item" data-page="beatsheet"><span class="ni">▤</span>비트시트 캔버스<span class="nav-badge" id="nb-beat">0</span></div>
+    <div class="nav-item" data-page="incident-canvas"><span class="ni">⌘</span>사건 캔버스<span class="nav-badge" id="nb-canvas">0</span></div>
+    <div class="nav-item" data-page="timeline"><span class="ni">≣</span>사건 타임라인<span class="nav-badge" id="nb-tline">0</span></div>
     <div class="nav-item" data-page="episodes"><span class="ni">✦</span>에피소드 조각<span class="nav-badge" id="nb-frag">0</span></div>
     <div class="nav-item" data-page="foreshadow"><span class="ni">◇</span>복선 · 회수<span class="nav-badge" id="nb-fs">0</span></div>
   </div>
@@ -946,13 +1241,17 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
     <div class="nav-group-label">원고</div>
     <div class="nav-item" data-page="manuscript"><span class="ni">▩</span>원고 · 회차<span class="nav-badge" id="nb-manu">0</span></div>
     <div class="nav-item" data-page="writing-mode"><span class="ni">✎</span>쓰기 모드<span class="nav-badge" id="nb-wm">0</span></div>
-    <div class="nav-item" data-page="incident-canvas"><span class="ni">⌘</span>사건 캔버스<span class="nav-badge" id="nb-canvas">0</span></div>
   </div>
   <div class="nav-divider"></div>
   <div class="nav-group">
     <div class="nav-group-label">내보내기</div>
     <div class="nav-item" data-page="analysis-req"><span class="ni">✉</span>분석 요청서</div>
     <div class="nav-export-item" onclick="openExport()"><span class="ni">→</span>패키지 생성</div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-group">
+    <div class="nav-group-label">사용설명서</div>
+    <div class="nav-item" data-page="guide"><span class="ni">☰</span>앱 사용설명서</div>
   </div>
 </nav>
 
@@ -966,7 +1265,7 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
     </div>
     <div class="page-body">
       <div class="three-col">
-        <div class="field"><label class="field-label">장르</label><input class="f-input mono" id="ov-genre" placeholder="로맨스 GL · 판타지 · ..."></div>
+        <div class="field"><label class="field-label">장르</label><input class="f-input mono" id="ov-genre" placeholder="로맨스 · 판타지 · ..."></div>
         <div class="field"><label class="field-label">플랫폼 · 타겟</label><input class="f-input mono" id="ov-target" placeholder="카카오페이지 · 20-30대"></div>
         <div class="field"><label class="field-label">총 화수</label><input class="f-input mono" id="ov-total" placeholder="70화"></div>
       </div>
@@ -977,6 +1276,7 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
         <div class="field"><label class="field-label">아크 구분</label><textarea class="f-input md" id="ov-arcs" placeholder="1부 (1~25화) 성장기&#10;2부 (26~50화) 갈등기&#10;3부 (51~70화) 결말"></textarea></div>
         <div class="field"><label class="field-label">작가 메모</label><textarea class="f-input md" id="ov-memo" placeholder="톤앤매너, 참고 레퍼런스, 개인 메모 등"></textarea></div>
       </div>
+      
     </div>
   </div>
 
@@ -999,11 +1299,40 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
       <button class="page-action" onclick="addRelRow()">+ 관계 추가</button>
     </div>
     <div class="page-body">
-      <div id="rel-svg-container"><svg id="rel-svg"></svg></div>
+      <div id="rel-svg-container" aria-hidden="true" style="display:none;"><svg id="rel-svg"></svg></div>
+
+      <div class="rel-board-shell">
+        <div class="rel-board-toolbar">
+          <button class="page-action" type="button" onclick="relBoardAddCharNode()">+ 인물 노드</button>
+          <button class="page-action ghost" type="button" onclick="relBoardImportCharacters()">캐릭터 불러오기</button>
+          <button class="page-action ghost" type="button" onclick="relBoardAddTextNode()">+ 텍스트 박스</button>
+          <button class="page-action ghost" type="button" onclick="relBoardAddLink()">+ 연결선</button>
+          <span class="rel-board-note">노드는 드래그로 이동. 연결선에서 색, 점선, 방향을 조절할 수 있어요.</span>
+        </div>
+        <div class="rel-board-side">
+          <div class="rel-board-canvas-wrap">
+            <div class="rel-board-stage" id="rel-board-stage">
+              <svg id="rel-board-svg"></svg>
+            </div>
+          </div>
+          <div class="rel-board-editor">
+            <div class="rel-board-editor-head">관계도 편집</div>
+            <div class="rel-board-editor-body">
+              <div id="rel-board-selected-editor"></div>
+              <hr class="section-rule">
+              <div>
+                <div class="field-label" style="margin-bottom:6px;">연결선 목록</div>
+                <div id="rel-link-list" class="rel-link-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="rel-list" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn-add-row" onclick="addRelRow()">+ 관계 추가</button>
       <hr class="section-rule">
-      <div class="field"><label class="field-label">관계 변화 서술</label><textarea class="f-input lg" id="rel-narrative" placeholder="각 관계가 어떻게 발전하는지 서술. 예) 윤정↔준리: 1화 적대 → 15화 동료의식 → 30화 감정 인식 → 50화 고백"></textarea></div>
+      <div class="field"><label class="field-label">관계 변화 서술</label><textarea class="f-input lg" id="rel-narrative" placeholder="각 관계가 어떻게 발전하는지 서술. 예) 주인공A↔주인공B: 1화 적대 → 15화 동료의식 → 30화 감정 인식 → 50화 고백"></textarea></div>
     </div>
   </div>
 
@@ -1029,9 +1358,10 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
   <!-- ══ 비트시트 캔버스 ══ -->
   <div class="page" id="page-beatsheet">
     <div class="page-header">
-      <div class="page-header-left"><div class="page-title">비트시트 캔버스</div><div class="page-sub">3-ACT DRAG & DROP BOARD</div></div>
+      <div class="page-header-left"><div class="page-title">비트시트 캔버스</div><div class="page-sub">EDITABLE STRUCTURE · DRAG & DROP BOARD</div></div>
       <div style="display:flex;gap:8px;">
         <button class="page-action ghost" onclick="addBeatTemplate()">템플릿 삽입</button>
+        <button class="page-action ghost" onclick="addBeatAct()">+ 구간 추가</button>
         <button class="page-action" id="beat-add-btn">+ 카드 추가 ▾</button>
       </div>
     </div>
@@ -1040,6 +1370,41 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
     <!-- 3막 캔버스 -->
     <div id="beat-canvas-wrap">
       <div class="act-row" id="act-row"></div>
+    </div>
+  </div>
+
+
+
+  <!-- ══ 사건 타임라인 ══ -->
+  <div class="page" id="page-timeline">
+    <div class="page-header">
+      <div class="page-header-left"><div class="page-title">사건 타임라인</div><div class="page-sub">STORY EVENTS · CARD SOURCE FOR EPISODE FRAGMENTS</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="timeline-mode">
+          <button id="tl-mode-list" class="active" onclick="setTimelineView('list')">세로 목록</button>
+          <button id="tl-mode-h" onclick="setTimelineView('horizontal')">가로 타임라인</button>
+        </div>
+        <button class="page-action ghost" onclick="syncTimelineToFragments(true)">조각으로 동기화</button>
+        <button class="page-action" onclick="addTimelineEvent()">+ 사건 카드 추가</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="timeline-shell" id="timeline-shell">
+        <div class="timeline-main">
+          <div class="timeline-toolbar">
+            <span class="page-sub">사건 카드는 원본 입력, 에피소드 조각은 자동 요약본으로 연결돼요.</span>
+            <button class="page-action ghost" onclick="addTimelineArc()">+ 구간 추가</button>
+            <button class="page-action ghost" onclick="resetTimelineArcs()">기본 구간 복원</button>
+          </div>
+          <div class="timeline-board" id="timeline-board"></div>
+        </div>
+        <div class="timeline-side">
+          <div class="timeline-side-head">사건 카드 편집</div>
+          <div class="timeline-side-body" id="timeline-side-body">
+            <div class="timeline-empty">사건 카드를 클릭하면<br>오른쪽에서 편집할 수 있어요.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1081,7 +1446,7 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
         <tfoot><tr><td colspan="6" style="padding:10px;text-align:center;"><button class="btn-add-row" style="max-width:300px;" onclick="addFS()">+ 복선 추가</button></td></tr></tfoot>
       </table>
       <div style="padding:24px 28px;">
-        <div class="field"><label class="field-label">용어 위키 · 고유 설정 사전</label><textarea class="f-input lg" id="wiki-text" placeholder="작품 고유 용어 정의.&#10;예) 설렘 — 준리가 감정을 인식하기 이전의 무의식적 반응&#10;소품: 물병 뚜껑 — 1화 등장, 35화 감정 폭발의 트리거"></textarea></div>
+        <div class="field"><label class="field-label">용어 위키 · 고유 설정 사전</label><textarea class="f-input lg" id="wiki-text" placeholder="작품 고유 용어 정의.&#10;예) 봉인문 — 고대 계약의 흔적&#10;소품: 은빛 열쇠 — 3화 등장, 18화 비밀 공간 진입의 트리거"></textarea></div>
       </div>
     </div>
   </div>
@@ -1131,15 +1496,17 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
       <div class="wm-editor-card">
         <div class="wm-head">
           <span class="wm-head-title">draft editor</span>
-          <span class="wm-meta" id="wm-count">0자</span>
+          <div class="wm-head-tools">
+            <span class="wm-meta" id="wm-count">0자</span>
+            <div class="wm-head-actions">
+              <button class="page-action" style="padding:6px 12px;font-size:11px;" onclick="wmAutoStructure()">자동 정리</button>
+              <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmClearDraft()">초안 비우기</button>
+              <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmCopyDraft()">초안 복사</button>
+            </div>
+            <span class="wm-head-save" id="wm-save-note">자동 저장 대기 중</span>
+          </div>
         </div>
         <textarea class="wm-editor" id="wm-editor" placeholder="여기서 그냥 쭉 써내려가면 돼. 감정, 대사, 장면, 사건을 막 적어도 괜찮아."></textarea>
-        <div class="wm-actions">
-          <button class="page-action" style="padding:6px 12px;font-size:11px;" onclick="wmAutoStructure()">자동 정리</button>
-          <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmClearDraft()">초안 비우기</button>
-          <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmCopyDraft()">초안 복사</button>
-          <span class="wm-subnote" id="wm-save-note">자동 저장 대기 중</span>
-        </div>
       </div>
       <div class="wm-side-card">
         <div class="wm-head">
@@ -1152,6 +1519,36 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
             <div class="wm-kv"><div class="wm-k">감정 변화</div><div class="wm-v" id="wm-emotion">—</div></div>
             <div class="wm-kv"><div class="wm-k">핵심 사건</div><div class="wm-v" id="wm-event">—</div></div>
             <div class="wm-kv"><div class="wm-k">Hook</div><div class="wm-v" id="wm-hook">—</div></div>
+          </div>
+        </div>
+        <div class="wm-feedback">
+          <div class="wm-feedback-top">
+            <span class="wm-feedback-title">feedback loop</span>
+            <span class="wm-subnote">외부 분석 결과를 붙여넣으면 다시 쓰기모드 체크리스트로 되가져옵니다.</span>
+            <div class="wm-feedback-actions">
+              <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmApplyFeedbackLoop()">쓰기모드 반영</button>
+              <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmInsertFeedbackChecklist()">체크리스트를 초안에 붙이기</button>
+              <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="wmClearFeedbackLoop()">비우기</button>
+            </div>
+          </div>
+          <textarea id="wm-feedback-input" class="f-input wm-feedback-editor" placeholder="외부에서 받은 분석 결과를 여기에 붙여넣으세요. 예: 장점/문제점/수정 제안/강화할 감정선..."></textarea>
+          <div class="wm-feedback-grid">
+            <div class="wm-feedback-card">
+              <div class="wm-k">강점 유지</div>
+              <div id="wm-feedback-strengths" class="wm-feedback-empty">아직 분석 결과가 반영되지 않았습니다.</div>
+            </div>
+            <div class="wm-feedback-card">
+              <div class="wm-k">보완 포인트</div>
+              <div id="wm-feedback-issues" class="wm-feedback-empty">수정 포인트가 여기에 정리됩니다.</div>
+            </div>
+            <div class="wm-feedback-card full">
+              <div class="wm-k">다음 리라이팅 체크리스트</div>
+              <div id="wm-feedback-actions" class="wm-feedback-empty">분석 결과를 반영하면 바로 쓸 수 있는 체크리스트가 생성됩니다.</div>
+            </div>
+            <div class="wm-feedback-card full">
+              <div class="wm-k">추천 리라이팅 지시문</div>
+              <div id="wm-feedback-rewrite" class="wm-feedback-rewrite wm-feedback-empty">현재 초안에 맞는 짧은 재작성 지시문이 여기에 생성됩니다.</div>
+            </div>
           </div>
         </div>
         <div class="wm-card-list" id="wm-card-list"></div>
@@ -1234,11 +1631,140 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
         </div>
       </div>
 
+      <div class="prompt-preset-box">
+        <div style="font-size:11px;font-weight:700;color:var(--ink);">🧾 프롬프트 템플릿</div>
+        <div class="prompt-preset-row">
+          <label class="field-label" style="margin:0;">프리셋 선택</label>
+          <select id="analysis-prompt-preset" class="prompt-select" onchange="handlePromptPresetChange()"></select>
+          <button class="page-action ghost" style="padding:6px 12px;font-size:11px;" onclick="resetPromptToPreset()">선택 프리셋으로 다시 채우기</button>
+        </div>
+        <div class="prompt-helper">프리셋을 불러온 뒤 바로 수정할 수 있어요. 내보내기 패키지에는 <strong>프롬프트 + 분석 대상 회차 원고 + 추가 참고 범위</strong>가 함께 들어갑니다.</div>
+        <textarea id="analysis-prompt-text" class="f-input prompt-editor" placeholder="분석/리라이팅용 프롬프트를 입력하세요"></textarea>
+        <div id="analysis-scope-preview" class="scope-preview-box">분석 대상 회차를 고르면 여기에 함께 실릴 원고 범위가 표시됩니다.</div>
+      </div>
+
       <div class="analysis-grid" id="analysis-grid"></div>
       <hr class="section-rule">
       <div class="two-col">
         <div class="field"><label class="field-label">추가 요청사항 (자유)</label><textarea class="f-input lg" id="analysis-custom" placeholder="특별히 신경 써줬으면 하는 부분, 고민 중인 장면, 확신이 없는 구간 등"></textarea></div>
         <div class="field"><label class="field-label">현재 작업 진행 상황</label><textarea class="f-input lg" id="analysis-progress" placeholder="예: 40화까지 완료, 41-45화 구조 설계 중, 50화 이후 방향 고민 중"></textarea></div>
+      </div>
+    </div>
+  </div>
+  <!-- ══ 앱 사용설명서 ══ -->
+  <div class="page" id="page-guide">
+    <div class="page-header">
+      <div class="page-header-left"><div class="page-title">앱 사용설명서</div><div class="page-sub">USER GUIDE — 기능 설명, 추천 흐름, 빠른 사용 팁</div></div>
+    </div>
+    <div class="page-body">
+      <div class="guide-note-box">
+        이 앱은 <strong>작품 설계 → 서사 구조 정리 → 원고 집필 → 분석 요청 → 피드백 반영</strong> 흐름으로 쓰면 가장 안정적으로 돌아갑니다.
+        저장은 기본적으로 브라우저 내부에 이루어지므로, 중요한 작업물은 상단의 <span class="guide-inline-code">프로젝트 JSON 내보내기</span>로 백업해 두는 것을 권장합니다.
+      </div>
+
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-card-head">1. 작품 설계</div>
+          <div class="guide-card-body">
+            <div><strong>작품 개요</strong>: 로그라인, 장르, 핵심 정서를 빠르게 고정합니다.</div>
+            <div><strong>세계관 · 규칙</strong>: 배경 설정, 금기, 룰, 시간대 같은 기초 규칙을 정리합니다.</div>
+            <div><strong>캐릭터</strong>: 인물 정보와 이미지 파일을 함께 붙여 캐릭터 시트를 만듭니다.</div>
+            <div><strong>관계 · 변화</strong>: 인물 노드와 연결선, 텍스트 박스를 사용해 관계도를 시각적으로 정리합니다.</div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-head">2. 서사 구조</div>
+          <div class="guide-card-body">
+            <div><strong>비트시트 캔버스</strong>: 큰 줄기의 감정선과 전환점을 잡습니다.</div>
+            <div><strong>사건 캔버스</strong>: 장면 단위 사건을 메모처럼 흩뿌리듯 배치합니다.</div>
+            <div><strong>사건 타임라인</strong>: 사건들을 순서대로 정리해 흐름을 점검합니다.</div>
+            <div><strong>에피소드 조각</strong>: 회차별 아이디어 조각, 대사, 이미지 포인트를 저장합니다.</div>
+            <div><strong>복선 · 회수</strong>: 떡밥을 심고 회수되는 흐름을 추적합니다.</div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-head">3. 원고 작업</div>
+          <div class="guide-card-body">
+            <div><strong>원고 · 회차</strong>: 본문 초안과 프리뷰 탭을 같이 보며 회차별 원고를 관리합니다.</div>
+            <div><strong>쓰기 모드</strong>: 드래프트를 집중해서 쓰고, 자동 정리와 에피소드 카드 생성까지 이어갑니다.</div>
+            <div>원고 프리뷰에는 <strong>기본 회차 / 로맨스 / 갈등 / 클리프행어</strong> 고정 탭이 있어 참고용 템플릿으로 활용할 수 있습니다.</div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-head">4. 분석 요청</div>
+          <div class="guide-card-body">
+            <div><strong>분석 요청서</strong>: 프롬프트 프리셋을 고르고, 분석 대상 회차와 추가 요청을 정리합니다.</div>
+            <div><strong>패키지 생성</strong>: 현재 화, 참고 화, 카드, 추가 자료를 묶어 내보냅니다.</div>
+            <div>앱 안에 원고가 있으면 자동으로 패키지에 포함되고, 없으면 별도 업로드로 첨부할 수 있습니다.</div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-head">5. 추천 사용 순서</div>
+          <div class="guide-card-body guide-steps">
+            <div class="guide-step"><div>작품 개요와 캐릭터를 먼저 정리합니다.</div></div>
+            <div class="guide-step"><div>비트시트와 사건 캔버스로 큰 줄기를 잡습니다.</div></div>
+            <div class="guide-step"><div>에피소드 조각과 원고 회차에서 구체 장면을 만듭니다.</div></div>
+            <div class="guide-step"><div>쓰기 모드에서 초안을 작성하고, 자동 정리와 카드 생성을 활용합니다.</div></div>
+            <div class="guide-step"><div>분석 요청서에서 프롬프트와 범위를 설정해 패키지를 내보냅니다.</div></div>
+            <div class="guide-step"><div>받은 피드백은 다시 쓰기 모드에 반영해 리라이팅합니다.</div></div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-head">6. 자주 쓰는 팁</div>
+          <div class="guide-card-body">
+            <div><strong>백업</strong>: 작업 기기를 바꾸거나 큰 수정 전에 JSON 내보내기를 권장합니다.</div>
+            <div><strong>분석 범위</strong>: 현재 화만 보내기보다, 이전 2~3화를 참고 화로 함께 보내는 것이 개연성 점검에 유리합니다.</div>
+            <div><strong>관계도</strong>: 색상은 감정 성격, 선 종류는 관계 상태, 텍스트는 사건 변화를 적는 식으로 구분하면 읽기 쉽습니다.</div>
+            <div><strong>쓰기 템플릿</strong>: 프리뷰 고정 탭을 옆에 켜두고 집필칸은 자유롭게 쓰는 방식이 가장 덜 답답합니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="
+        text-align:center;
+        margin-top:80px;
+        padding-top:32px;
+        border-top:1px solid var(--rule);
+        font-family:var(--font-m);
+        color:var(--ink4);
+      ">
+        <div style="
+          font-size:10px;
+          letter-spacing:0.18em;
+          margin-bottom:8px;
+          opacity:0.7;
+        ">
+          STORY PACKAGER
+        </div>
+        <div style="
+          font-size:12px;
+          letter-spacing:0.12em;
+          color:var(--ink2);
+          font-weight:500;
+        ">
+          CREATED BY
+        </div>
+        <div style="
+          margin-top:6px;
+          font-size:13px;
+          letter-spacing:0.1em;
+          font-weight:700;
+          color:var(--ink);
+        ">
+          SUNNY &amp; CHATTER
+        </div>
+        <div style="
+          margin-top:10px;
+          font-size:10px;
+          opacity:0.5;
+        ">
+          for storytelling &amp; imagination
+        </div>
       </div>
     </div>
   </div>
@@ -1256,7 +1782,7 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
     <div class="modal-body">
       <div><div class="modal-section-title">출력 형식</div><div class="format-toggle"><button class="fmt-btn active" id="fmt-md" onclick="setFmt('md')">Markdown</button><button class="fmt-btn" id="fmt-json" onclick="setFmt('json')">JSON</button></div></div>
       <div><div class="modal-section-title">미리보기</div><div id="export-preview"></div></div>
-      <div class="export-howto"><strong>사용 방법</strong><br>파일을 다운로드한 뒤, Claude 대화창에 파일 내용을 붙여넣고 원하는 분석 요청을 함께 입력하세요.<br><br>예시: <code>이 패키지를 읽고, 감정선 흐름과 캐릭터 붕괴 여부를 검토해줘.</code></div>
+      <div class="export-howto"><strong>사용 방법</strong><br>파일을 다운로드한 뒤, 대화창에 그대로 붙여넣으면 됩니다. 이 패키지에는 선택한 <strong>프롬프트 템플릿, 분석 대상 회차 원고, 참고 범위</strong>가 함께 담깁니다.<br><br>예시: <code>이 패키지를 기준으로 34화를 상업 웹소설 문체로 리라이팅해줘.</code></div>
     </div>
     <div class="modal-foot">
       <div class="format-toggle" style="margin-right:auto;"><button class="fmt-btn active" id="fmt-md2" onclick="setFmt('md')">MD</button><button class="fmt-btn" id="fmt-json2" onclick="setFmt('json')">JSON</button></div>
@@ -1276,12 +1802,19 @@ body{font-family:var(--font-n);background:var(--bg);color:var(--ink);display:fle
    STATE
 ══════════════════════════════════ */
 let S = {
-  title:'',overview:{},characters:[],relations:[],relNarrative:'',
+  title:'',overview:{},characters:[],relations:[],relNarrative:'',relationshipBoard:{nodes:[],links:[]},
+  beatActs:[
+    {id:'act1',label:'1막',sub:'설정 · 발단',color:'#f5f3ee'},
+    {id:'act2a',label:'2막 A',sub:'갈등 상승',color:'#f3f0f8'},
+    {id:'act2b',label:'2막 B',sub:'최저점 · 반전',color:'#f8f0f0'},
+    {id:'act3',label:'3막',sub:'클라이맥스 · 결말',color:'#f0f5f0'}
+  ],
   beats:{act1:[],act2a:[],act2b:[],act3:[]},
   fragments:[],foreshadow:[],wikiText:'',manuscripts:[],
   worldBg:'',worldRules:'',worldItems:[],
-  analysisChecked:[],analysisCustom:'',analysisProgress:'',
-  writingMode:{draftTitle:'',draftText:'',cards:[],selectedCardId:''}
+  analysisChecked:[],analysisCustom:'',analysisProgress:'',analysisPromptPreset:'gl_commercial',analysisPromptText:'',
+  writingMode:{draftTitle:'',draftText:'',cards:[],selectedCardId:'',feedbackText:'',feedbackSummary:{strengths:[],issues:[],actions:[],rewritePrompt:''}},
+  timelineEvents:[], timelineView:'list'
 };
 let exportFmt = 'md';
 let activeTagFilters = new Set();
@@ -1298,6 +1831,7 @@ document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
     item.classList.add('active');
     document.getElementById('page-'+item.dataset.page).classList.add('active');
     if(item.dataset.page==='relations') renderSVG();
+    if(item.dataset.page==='timeline') renderTimelinePage();
   });
 });
 
@@ -1310,13 +1844,15 @@ setInterval(saveState,15000);
 
 function saveState(){
   collectFromDOM();
-  try{localStorage.setItem('spack_v4',JSON.stringify(S));}catch(e){}
+  try{localStorage.setItem('spack_v6_clean',JSON.stringify(S));}catch(e){}
   const t=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('autosave-txt').textContent='저장 '+t;
 }
 function loadState(){
   try{
-    const raw=localStorage.getItem('spack_v4');
+    try{ localStorage.removeItem('spack_v4'); }catch(_){}
+    try{ localStorage.removeItem('spack_v5_clean'); }catch(_){}
+    const raw=localStorage.getItem('spack_v6_clean');
     if(!raw)return;
     S={...S,...JSON.parse(raw)};
     applyToDOM();
@@ -1330,6 +1866,8 @@ function collectFromDOM(){
   S.wikiText=v('wiki-text');
   S.worldBg=v('world-bg');S.worldRules=v('world-rules');
   S.analysisCustom=v('analysis-custom');S.analysisProgress=v('analysis-progress');
+  S.analysisPromptPreset=(document.getElementById('analysis-prompt-preset')?.value)||S.analysisPromptPreset||'gl_commercial';
+  S.analysisPromptText=v('analysis-prompt-text');
   S.characters=[...document.querySelectorAll('.char-card')].map(c=>({
     name:gv(c,'[data-k="name"]'),role:gv(c,'[data-k="role"]'),age:gv(c,'[data-k="age"]'),
     personality:gv(c,'[data-k="personality"]'),desire:gv(c,'[data-k="desire"]'),
@@ -1337,15 +1875,18 @@ function collectFromDOM(){
     goal:gv(c,'[data-k="goal"]'),conflict:gv(c,'[data-k="conflict"]'),
     speech:gv(c,'[data-k="speech"]'),forbidden:gv(c,'[data-k="forbidden"]'),
     growth:gv(c,'[data-k="growth"]'),memo:gv(c,'[data-k="memo"]'),
+    image:c.dataset.image||'',
     tags:getTagsFromWrap(c.querySelector('.tag-input-wrap'))
   }));
+  S.relationshipBoard = getRelationBoardState();
   S.relations=[...document.querySelectorAll('.rel-card')].map(r=>({
     from:gv(r,'[data-k="from"]'),label:gv(r,'[data-k="label"]'),
     to:gv(r,'[data-k="to"]'),desc:gv(r,'[data-k="desc"]'),phase:gv(r,'[data-k="phase"]')
   }));
-  // beats: 각 막별로 수집
+  // beats: 각 구간별로 수집
+  S.beatActs = normalizeBeatActs(ACTS);
   S.beats={};
-  ['act1','act2a','act2b','act3'].forEach(act=>{
+  ACTS.forEach(({id:act})=>{
     const zone=document.querySelector(`.beat-drop-zone[data-act="${act}"]`);
     if(!zone)return;
     S.beats[act]=[...zone.querySelectorAll('.beat-card')].map(c=>({
@@ -1372,7 +1913,11 @@ function collectFromDOM(){
   });
   S.manuscripts=[...document.querySelectorAll('.manu-card')].map(mc=>({
     ep:gv(mc,'[data-k="ep"]'),title:gv(mc,'[data-k="title"]'),
-    preview:mc.querySelector('.manu-preview')?.dataset.content||'',
+    preview:mc.dataset.basePreview || mc.querySelector('.manu-preview')?.dataset.content||'',
+    currentPreview: mc.dataset.currentPreview || 'base',
+    previewRefs: JSON.parse(mc.dataset.previewRefs||'[]'),
+    previewHeight: parseInt(mc.dataset.previewHeight||mc.querySelector('.manu-preview')?.offsetHeight||260,10),
+    draftHeight: parseInt(mc.dataset.draftHeight||mc.querySelector('.manu-write-ta')?.offsetHeight||360,10),
     draft:mc.querySelector('.manu-write-ta')?.value||'',
     archives:JSON.parse(mc.dataset.archives||'[]')
   }));
@@ -1387,6 +1932,8 @@ function collectFromDOM(){
   S.writingMode = {
     draftTitle: v('wm-title'),
     draftText: v('wm-editor'),
+    feedbackText: v('wm-feedback-input'),
+    feedbackSummary: wmCollectFeedbackSummary(),
     selectedCardId: S.writingMode?.selectedCardId || '',
     cards: [...document.querySelectorAll('.wm-episode-card')].map(card=>({
       id: card.dataset.id || '',
@@ -1397,7 +1944,11 @@ function collectFromDOM(){
       event: card.dataset.event || '',
       hook: card.dataset.hook || '',
       summary: card.dataset.summary || '',
-      source: card.dataset.source || ''
+      draft: card.dataset.draft || '',
+      fragId: card.dataset.fragId || '',
+      timelineId: card.dataset.timelineId || '',
+      source: card.dataset.source || '',
+      collapsed: card.dataset.collapsed !== 'false'
     }))
   };
 }
@@ -1408,10 +1959,16 @@ function applyToDOM(){
   sv('rel-narrative',S.relNarrative);sv('wiki-text',S.wikiText);
   sv('world-bg',S.worldBg);sv('world-rules',S.worldRules);
   sv('analysis-custom',S.analysisCustom);sv('analysis-progress',S.analysisProgress);
+  populatePromptPresetSelect();
+  const presetSel=document.getElementById('analysis-prompt-preset'); if(presetSel) presetSel.value=S.analysisPromptPreset||'gl_commercial';
+  sv('analysis-prompt-text',S.analysisPromptText||'');
   (S.characters||[]).forEach(c=>addChar(c));
   (S.relations||[]).forEach(r=>addRelRow(r));
+  initRelationBoard(S.relationshipBoard||{nodes:[],links:[]});
+  ACTS = normalizeBeatActs(S.beatActs || ACTS);
+  buildBeatCanvas();
   if(S.beats){
-    ['act1','act2a','act2b','act3'].forEach(act=>{
+    ACTS.forEach(({id:act})=>{
       (S.beats[act]||[]).forEach(b=>addBeatCard(b,act));
     });
   }
@@ -1420,15 +1977,27 @@ function applyToDOM(){
   (S.manuscripts||[]).forEach(m=>addManuCard(m));
   (S.worldItems||[]).forEach(w=>addWorldItem(w));
   renderCanvasFromState(S.incidentCanvas||{notes:[],links:[],areas:[]});
+  window.timelineView = S.timelineView || 'list';
+  renderTimelinePage(S.timelineEvents||[]);
+  syncTimelineToFragments(false);
   document.querySelectorAll('.analysis-card').forEach(el=>{
     if((S.analysisChecked||[]).includes(el.dataset.id))el.classList.add('selected');
   });
+  analysisRanges=[...(S.analysisScope?.ranges||[])];
+  analysisUploadedFiles=[...(S.analysisScope?.uploadedFiles||[])];
+  renderScopeChips();
+  renderUploadedFiles();
+  updateAnalysisManuChips();
+  updateAnalysisScopePreview();
   if(S.writingMode){
     sv('wm-title', S.writingMode.draftTitle);
     sv('wm-editor', S.writingMode.draftText);
+    sv('wm-feedback-input', S.writingMode.feedbackText||'');
+    renderWritingModeFeedback(S.writingMode.feedbackSummary||{});
     renderWritingModeCards(S.writingMode.cards||[]);
     updateWritingModeMeta();
   } else {
+    renderWritingModeFeedback({});
     renderWritingModeCards([]);
     updateWritingModeMeta();
   }
@@ -1439,17 +2008,255 @@ function sv(id,val){const el=document.getElementById(id);if(el&&val!==undefined)
 function gv(parent,sel){const el=parent.querySelector(sel);return el?el.value:'';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+
+/* ══════════════════════════════════
+   TIMELINE EVENTS
+══════════════════════════════════ */
+const DEFAULT_TL_ARCS=[
+  {id:'past',label:''},
+  {id:'arc1',label:''},
+  {id:'arc2',label:''},
+  {id:'arc3',label:''},
+  {id:'end',label:''},
+];
+let timelineView='list';
+let selectedTimelineId=null;
+let timelineDragSrcId=null;
+let timelineIdCounter=1;
+function ensureTimelineArcs(){
+  if(!Array.isArray(S.timelineArcs) || !S.timelineArcs.length){
+    S.timelineArcs = DEFAULT_TL_ARCS.map(a=>({...a}));
+  }
+  return S.timelineArcs;
+}
+function timelineArcs(){ return ensureTimelineArcs(); }
+function timelineArcLabel(id){return (timelineArcs().find(a=>a.id===id)||{}).label||id||'';}
+function addTimelineArc(){
+  const arcs=timelineArcs();
+  const id='arc'+Date.now();
+  arcs.push({id,label:''});
+  renderTimelinePage();
+  saveState();
+}
+function updateTimelineArcLabel(id, value){
+  const arc=timelineArcs().find(a=>a.id===id); if(!arc) return;
+  arc.label=(value||'').trim();
+  renderTimelinePage();
+  if(selectedTimelineId) selectTimelineEvent(selectedTimelineId);
+  saveState();
+}
+function deleteTimelineArc(id){
+  const arcs=timelineArcs();
+  if(arcs.length<=1){ toast('구간은 최소 1개는 남아야 해요'); return; }
+  const idx=arcs.findIndex(a=>a.id===id); if(idx<0) return;
+  const fallback=arcs.find(a=>a.id!==id)?.id || arcs[0].id;
+  (S.timelineEvents||[]).forEach(ev=>{ if(ev.arc===id) ev.arc=fallback; });
+  arcs.splice(idx,1);
+  renderTimelinePage();
+  if(selectedTimelineId) selectTimelineEvent(selectedTimelineId);
+  saveState();
+}
+function resetTimelineArcs(){
+  if(!confirm('타임라인 구간을 기본값으로 되돌릴까요? 현재 사건 카드는 이름이 같은 구간이 없으면 첫 구간으로 이동합니다.')) return;
+  const prev=timelineArcs().map(a=>a.id);
+  S.timelineArcs = DEFAULT_TL_ARCS.map(a=>({...a}));
+  const valid=new Set(S.timelineArcs.map(a=>a.id));
+  const fallback=S.timelineArcs[0].id;
+  (S.timelineEvents||[]).forEach(ev=>{ if(!valid.has(ev.arc)) ev.arc=fallback; });
+  renderTimelinePage();
+  if(selectedTimelineId) selectTimelineEvent(selectedTimelineId);
+  saveState();
+}
+function ensureTimelineSeed(){
+  if((S.timelineEvents||[]).length) return;
+  const arcs=timelineArcs();
+  const seeded=[];
+  const seedIds=[arcs[0]?.id||'arc1', arcs[1]?.id||arcs[0]?.id||'arc1', arcs[2]?.id||arcs[0]?.id||'arc1', arcs[3]?.id||arcs[0]?.id||'arc1'];
+  ['act1','act2a','act2b','act3'].forEach((act,idx)=>{
+    (S.beats?.[act]||[]).forEach((b,i)=>seeded.push({id:'tl-'+(timelineIdCounter++),arc:seedIds[Math.min(idx,3)]||arcs[0]?.id||'arc1',ep:b.ep||'',epNote:'',title:b.title||'새 사건',chars:[],summary:b.purpose||'',notes:b.emotion||'',fragId:''}));
+  });
+  S.timelineEvents=seeded;
+}
+function collectTimelineFromDOM(){
+  const cards=[...document.querySelectorAll('.timeline-card[data-tl-id], .timeline-h-card[data-tl-id]')];
+  const seen=new Set();
+  const out=[];
+  cards.forEach(card=>{
+    const id=card.dataset.tlId; if(!id||seen.has(id)) return; seen.add(id);
+    const ev=(window._timelineCache||[]).find(x=>x.id===id) || (S.timelineEvents||[]).find(x=>x.id===id) || {};
+    out.push({...ev});
+  });
+  return out.length?out:(S.timelineEvents||[]);
+}
+function setTimelineView(mode){ timelineView=mode; renderTimelinePage(); }
+function renderTimelinePage(initial){
+  if(initial) S.timelineEvents=initial;
+  ensureTimelineSeed();
+  timelineView = window.timelineView || timelineView || 'list';
+  const listBtn=document.getElementById('tl-mode-list'); const hBtn=document.getElementById('tl-mode-h');
+  if(listBtn) listBtn.classList.toggle('active', timelineView==='list');
+  if(hBtn) hBtn.classList.toggle('active', timelineView==='horizontal');
+  const board=document.getElementById('timeline-board'); if(!board) return;
+  const evs=(S.timelineEvents||[]); window._timelineCache=evs;
+  if(timelineView==='horizontal') return renderTimelineHorizontal(board, evs);
+  let html='';
+  timelineArcs().forEach(arc=>{
+    const items=evs.filter(e=>e.arc===arc.id);
+    html += `<div class="timeline-arc-section"><div class="timeline-arc-head"><input class="timeline-arc-pill-input" placeholder="구간명 입력" value="${esc(arc.label)}" onchange="updateTimelineArcLabel('${arc.id}', this.value)" onblur="updateTimelineArcLabel('${arc.id}', this.value)"><div class="timeline-arc-line"></div><div class="timeline-arc-tools"><span class="timeline-arc-count">${items.length}건</span><button type="button" class="timeline-arc-del" onclick="deleteTimelineArc('${arc.id}')">삭제</button></div></div><div class="timeline-drop-zone" data-tl-arc="${arc.id}" ondragover="tlOnDragOver(event)" ondrop="tlOnDrop(event,'${arc.id}')">`;
+    items.forEach(ev=>{
+      const sel=ev.id===selectedTimelineId?' selected':'';
+      html += `<div class="timeline-card${sel}" data-tl-id="${ev.id}" draggable="true" onclick="selectTimelineEvent('${ev.id}')" ondragstart="tlOnDragStart(event,'${ev.id}')" ondragend="tlOnDragEnd(event)"><div class="drag-handle">⠿</div><div class="timeline-ep">${esc(ev.ep||'미정')}</div><div class="timeline-card-body"><div class="timeline-card-title">${esc(ev.title||'새 사건')}</div><div class="timeline-char-row">${(ev.chars||[]).map(ch=>`<span class="timeline-char-tag">${esc(ch)}</span>`).join('')}</div><div class="timeline-card-summary">${esc(ev.summary||'')}</div>${ev.fragId?`<div style="margin-top:6px;"><span class="timeline-link-chip">조각 연결됨</span></div>`:''}${ev.source==='writing-mode'?`<div style="margin-top:6px;"><span class="timeline-link-chip wm-link">쓰기 카드 연결</span></div>`:''}</div></div>`;
+    });
+    html += `<button class="timeline-add" onclick="addTimelineEvent('${arc.id}')">+ ${(arc.label||'이 구간')} 사건 추가</button></div></div>`;
+  });
+  board.innerHTML=html;
+  updateBadges();
+}
+function renderTimelineHorizontal(board, evs){
+  let html='<div class="timeline-h-row">';
+  timelineArcs().forEach(arc=>{
+    const items=evs.filter(e=>e.arc===arc.id);
+    html += `<div class="timeline-h-col"><div class="timeline-h-head">${arc.label||'미지정 구간'} (${items.length})</div><div class="timeline-h-cards">`;
+    items.forEach(ev=>{
+      const sel=ev.id===selectedTimelineId?' selected':'';
+      html += `<div class="timeline-h-card${sel}" data-tl-id="${ev.id}" onclick="selectTimelineEvent('${ev.id}')"><div class="timeline-ep">${esc(ev.ep||'미정')}</div><div class="timeline-card-title">${esc(ev.title||'새 사건')}</div></div>`;
+    });
+    html += `<button class="timeline-add" onclick="addTimelineEvent('${arc.id}')">+ 사건 추가</button></div></div>`;
+  });
+  html+='</div>'; board.innerHTML=html; updateBadges();
+}
+function addTimelineEvent(arc='arc1'){
+  const id='tl-'+(timelineIdCounter++);
+  const ev={id,arc,ep:'',epNote:'',title:'새 사건',chars:[],summary:'',notes:'',fragId:''};
+  S.timelineEvents.push(ev); selectedTimelineId=id; renderTimelinePage(); selectTimelineEvent(id); syncTimelineToFragments(false);
+}
+function selectTimelineEvent(id){
+  selectedTimelineId=id; renderTimelinePage();
+  const ev=(S.timelineEvents||[]).find(x=>x.id===id); if(!ev) return;
+  const side=document.getElementById('timeline-side-body'); if(!side) return;
+  side.innerHTML=`<div class="field"><label class="field-label">아크</label><select class="f-input mono" id="tl-arc" onchange="updateTimelineEvent()">${timelineArcs().map(a=>`<option value="${a.id}"${a.id===ev.arc?' selected':''}>${a.label}</option>`).join('')}</select></div>
+  <div class="timeline-mini-grid"><div class="field"><label class="field-label">화수</label><input class="f-input mono" id="tl-ep" value="${esc(ev.ep||'')}" placeholder="예: 12"></div><div class="field"><label class="field-label">비고</label><input class="f-input" id="tl-epnote" value="${esc(ev.epNote||'')}" placeholder="예: 초안 미포함"></div></div>
+  <div class="field"><label class="field-label">사건 제목</label><input class="f-input" id="tl-title" value="${esc(ev.title||'')}"></div>
+  <div class="field"><label class="field-label">등장 인물</label><div id="tl-char-wrap" style="display:flex;flex-wrap:wrap;gap:6px;">${(S.characters||[]).map(c=>{const n=c.name||''; const on=(ev.chars||[]).includes(n); return `<button type="button" class="canvas-chip ${on?'active':''}" onclick="toggleTimelineChar('${esc(n)}')">${esc(n||'이름없음')}</button>`}).join('')}</div></div>
+  <div class="field"><label class="field-label">사건 요약</label><textarea class="f-input lg" id="tl-summary" placeholder="이 사건에서 반드시 일어나는 일">${esc(ev.summary||'')}</textarea></div>
+  <div class="field"><label class="field-label">작가 메모</label><textarea class="f-input md" id="tl-notes" placeholder="복선, 뉘앙스, 삽입 위치 메모">${esc(ev.notes||'')}</textarea></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><button class="page-action" onclick="updateTimelineEvent(true)">저장</button><button class="page-action ghost" onclick="syncSingleTimelineEvent('${ev.id}', true)">이 사건만 조각 업데이트</button><button class="btn-del" onclick="deleteTimelineEvent('${ev.id}')">삭제</button>${ev.fragId?`<span class="timeline-link-chip">연결 조각: ${esc(ev.fragId)}</span>`:''}</div>`;
+}
+function updateTimelineEvent(withSync){
+  const ev=(S.timelineEvents||[]).find(x=>x.id===selectedTimelineId); if(!ev) return;
+  ev.arc=v('tl-arc'); ev.ep=v('tl-ep'); ev.epNote=v('tl-epnote'); ev.title=v('tl-title'); ev.summary=v('tl-summary'); ev.notes=v('tl-notes');
+  renderTimelinePage(); selectTimelineEvent(ev.id); if(withSync) syncSingleTimelineEvent(ev.id,true);
+}
+function toggleTimelineChar(name){ const ev=(S.timelineEvents||[]).find(x=>x.id===selectedTimelineId); if(!ev) return; ev.chars=ev.chars||[]; if(ev.chars.includes(name)) ev.chars=ev.chars.filter(x=>x!==name); else ev.chars.push(name); selectTimelineEvent(ev.id); renderTimelinePage(); }
+function deleteTimelineEvent(id){ if(!confirm('이 사건 카드를 삭제할까요?')) return; const idx=(S.timelineEvents||[]).findIndex(x=>x.id===id); if(idx>-1){ const ev=S.timelineEvents[idx]; S.timelineEvents.splice(idx,1); if(ev.fragId){ const frag=document.querySelector('.frag-card[data-frag-id="'+ev.fragId+'"]')||document.getElementById(ev.fragId); if(frag && frag.dataset.source==='timeline') frag.remove(); } } selectedTimelineId=null; renderTimelinePage(); const side=document.getElementById('timeline-side-body'); if(side) side.innerHTML='<div class="timeline-empty">사건 카드를 클릭하면<br>오른쪽에서 편집할 수 있어요.</div>'; updateBadges(); rebuildHashFilters(); }
+function tlOnDragStart(e,id){ timelineDragSrcId=id; e.dataTransfer.effectAllowed='move'; const el=e.currentTarget; setTimeout(()=>el.classList.add('dragging'),0); }
+function tlOnDragEnd(e){ document.querySelectorAll('.timeline-card').forEach(el=>el.classList.remove('drag-over','dragging')); }
+function tlOnDragOver(e){ e.preventDefault(); const c=e.target.closest('.timeline-card'); document.querySelectorAll('.timeline-card').forEach(el=>el.classList.remove('drag-over')); if(c) c.classList.add('drag-over'); }
+function tlOnDrop(e,targetArc){ e.preventDefault(); const src=(S.timelineEvents||[]).find(x=>x.id===timelineDragSrcId); if(!src) return; src.arc=targetArc; const target=e.target.closest('.timeline-card'); if(target){ const targetId=target.dataset.tlId; if(targetId && targetId!==src.id){ const srcIdx=S.timelineEvents.findIndex(x=>x.id===src.id); const obj=S.timelineEvents.splice(srcIdx,1)[0]; const tgtIdx=S.timelineEvents.findIndex(x=>x.id===targetId); S.timelineEvents.splice(tgtIdx,0,obj); } } renderTimelinePage(); syncTimelineToFragments(false); }
+function upsertTimelineFragment(ev){
+  if(!ev.fragId) ev.fragId='frag-tl-'+String(ev.id).replace(/[^\w-]/g,'');
+  let frag=document.getElementById(ev.fragId) || document.querySelector('.frag-card[data-frag-id="'+ev.fragId+'"]');
+  const arcTxt=timelineArcLabel(ev.arc);
+  const purpose = ev.summary || '';
+  const reveal = ev.notes || '';
+  const memoParts=[];
+  (ev.chars||[]).forEach(ch=>memoParts.push('#'+String(ch).replace(/\s+/g,'')));
+  if(ev.title) memoParts.push('#'+String(ev.title).replace(/\s+/g,'_').replace(/[^\w가-힣_#-]/g,''));
+  const memo = [...new Set(memoParts)].join(' ');
+  if(!frag){
+    addFrag({id:ev.fragId, ep:ev.ep||'', title:ev.title||'', arc:arcTxt, purpose:purpose, state_change:'', reveal:reveal, hook:'', memo});
+    frag=document.getElementById(ev.fragId) || document.querySelector('.frag-card[data-frag-id="'+ev.fragId+'"]');
+  }
+  if(!frag) return;
+  frag.dataset.source='timeline'; frag.dataset.eventId=ev.id;
+  const epEl=frag.querySelector('[data-k="ep"]'); if(epEl) epEl.value=ev.ep||'';
+  const titleEl=frag.querySelector('[data-k="title"]'); if(titleEl) titleEl.value=ev.title||'';
+  const arcEl=frag.querySelector('[data-k="arc"]'); if(arcEl) arcEl.value=arcTxt;
+  const purposeEl=frag.querySelector('[data-k="purpose"]'); if(purposeEl) purposeEl.value=purpose;
+  const revealEl=frag.querySelector('[data-k="reveal"]'); if(revealEl) revealEl.value=reveal;
+  const memoEl=frag.querySelector('.frag-memo-ta'); if(memoEl) memoEl.value=memoEl.value && memoEl.value.includes('#timeline_keep') ? memoEl.value : memo;
+  renderFragTags(frag);
+  let badge=frag.querySelector('.frag-source-badge');
+  if(!badge){ const tEl=frag.querySelector('[data-k="title"]'); if(tEl){ badge=document.createElement('span'); badge.className='frag-source-badge'; badge.textContent='사건 카드 연결'; tEl.insertAdjacentElement('afterend', badge);} }
+}
+function syncSingleTimelineEvent(id, notice){ const ev=(S.timelineEvents||[]).find(x=>x.id===id); if(!ev) return; upsertTimelineFragment(ev); updateBadges(); rebuildHashFilters(); filterFrags(); if(notice) toast('사건 카드가 에피소드 조각에 반영됐어요.'); }
+function syncTimelineToFragments(notice){ (S.timelineEvents||[]).forEach(upsertTimelineFragment); updateBadges(); rebuildHashFilters(); filterFrags(); if(notice) toast('사건 카드 전체를 에피소드 조각과 동기화했어요.'); }
 /* ══════════════════════════════════
    CHARACTERS
 ══════════════════════════════════ */
 const CHAR_FIELDS=[['나이 · 외형','age',''],['성격','personality','직관적, 충동적'],['욕망 (Want)','desire','표면적으로 원하는 것'],['결핍 (Need)','deficiency','실제로 필요한 것'],['트라우마 · 상처','trauma',''],['목표','goal',''],['갈등 · 장벽','conflict',''],['말투 · 대화체','speech','예시 대사로 표현 권장'],['금지 행동','forbidden','이 캐릭터가 절대 안 하는 것'],['성장 호 (Arc)','growth','이야기 전후 변화'],['메모','memo','']];
+function makeCharAvatarHTML(data={}){
+  if(data.image){
+    return `<img src="${esc(data.image)}" alt="character image">`;
+  }
+  const init=(data.name||'?')[0]||'?';
+  return `<span>${esc(init)}</span>`;
+}
 function addChar(data={}){
   const list=document.getElementById('char-list');
   const card=document.createElement('div');card.className='char-card card';
-  const init=(data.name||'?')[0]||'?';
-  card.innerHTML=`<div class="card-header"><div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--font-s);font-size:14px;font-weight:700;color:var(--ink2);flex-shrink:0;">${esc(init)}</div><input class="card-title-input" data-k="name" placeholder="이름" value="${esc(data.name||'')}"><input style="width:80px;background:transparent;border:none;outline:none;font-family:var(--font-m);font-size:11px;color:var(--ink3);text-align:right;" data-k="role" placeholder="역할" value="${esc(data.role||'')}"></div><div class="card-body">${CHAR_FIELDS.map(([l,k,ph])=>`<div class="field"><label class="field-label">${l}</label><textarea class="f-input" data-k="${k}" rows="1" placeholder="${ph}">${esc(data[k]||'')}</textarea></div>`).join('')}<div class="field"><label class="field-label">태그</label><div class="tag-input-wrap" onclick="this.querySelector('.tag-bare-input').focus()">${(data.tags||[]).map(t=>`<span class="tag-pill">${esc(t)}<span class="tag-pill-x" onclick="removeTag(this)">×</span></span>`).join('')}<input class="tag-bare-input" placeholder="#주인공 #로맨스" onkeydown="handleTagKey(event)"></div></div></div><div class="card-footer"><button class="btn-del" onclick="this.closest('.char-card').remove();updateBadges();renderSVG();">삭제</button></div>`;
-  card.querySelector('[data-k="name"]').addEventListener('input',function(){card.querySelector('.card-header div').textContent=(this.value||'?')[0];renderSVG();});
-  list.appendChild(card);updateBadges();
+  card.dataset.image=data.image||'';
+  card.innerHTML=`<div class="card-header">
+    <div class="char-header-meta">
+      <div class="char-head-avatar">${makeCharAvatarHTML(data)}</div>
+      <input class="card-title-input" data-k="name" placeholder="이름" value="${esc(data.name||'')}">
+    </div>
+    <input style="width:80px;background:transparent;border:none;outline:none;font-family:var(--font-m);font-size:11px;color:var(--ink3);text-align:right;" data-k="role" placeholder="역할" value="${esc(data.role||'')}">
+  </div>
+  <div class="card-body">
+    <div class="char-image-shell">
+      <div>
+        <div class="char-image-box" data-role="image-box">${data.image?`<img src="${esc(data.image)}" alt="character image">`:`<div class="char-image-placeholder">PNG / JPG<br>캐릭터 사진 업로드</div>`}</div>
+        <div class="char-image-actions">
+          <button type="button" class="char-mini-btn" onclick="triggerCharImageUpload(this)">이미지 업로드</button>
+          <button type="button" class="char-mini-btn" onclick="clearCharImage(this)">지우기</button>
+          <input type="file" accept="image/png,image/jpeg,image/jpg" style="display:none" onchange="handleCharImageUpload(event,this)">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${CHAR_FIELDS.map(([l,k,ph])=>`<div class="field"><label class="field-label">${l}</label><textarea class="f-input" data-k="${k}" rows="1" placeholder="${ph}">${esc(data[k]||'')}</textarea></div>`).join('')}
+        <div class="field"><label class="field-label">태그</label><div class="tag-input-wrap" onclick="this.querySelector('.tag-bare-input').focus()">${(data.tags||[]).map(t=>`<span class="tag-pill">${esc(t)}<span class="tag-pill-x" onclick="removeTag(this)">×</span></span>`).join('')}<input class="tag-bare-input" placeholder="#주인공 #로맨스" onkeydown="handleTagKey(event)"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer"><button class="btn-del" onclick="this.closest('.char-card').remove();updateBadges();renderSVG();relBoardSyncCharacterNames();">삭제</button></div>`;
+  card.querySelector('[data-k="name"]').addEventListener('input',function(){
+    const avatar=card.querySelector('.char-head-avatar');
+    if(card.dataset.image){
+      avatar.innerHTML=`<img src="${esc(card.dataset.image)}" alt="character image">`;
+    }else{
+      avatar.innerHTML=`<span>${esc((this.value||'?')[0]||'?')}</span>`;
+    }
+    renderSVG();
+    relBoardSyncCharacterNames();
+  });
+  list.appendChild(card);updateBadges(); relBoardSyncCharacterNames();
+}
+function triggerCharImageUpload(btn){
+  btn.parentElement.querySelector('input[type="file"]').click();
+}
+function handleCharImageUpload(ev,input){
+  const file=ev.target.files?.[0];
+  if(!file)return;
+  const card=input.closest('.char-card');
+  const reader=new FileReader();
+  reader.onload=()=>{
+    card.dataset.image=String(reader.result||'');
+    const box=card.querySelector('[data-role="image-box"]');
+    const avatar=card.querySelector('.char-head-avatar');
+    box.innerHTML=`<img src="${card.dataset.image}" alt="character image">`;
+    avatar.innerHTML=`<img src="${card.dataset.image}" alt="character image">`;
+    saveState();
+  };
+  reader.readAsDataURL(file);
+}
+function clearCharImage(btn){
+  const card=btn.closest('.char-card');
+  card.dataset.image='';
+  card.querySelector('[data-role="image-box"]').innerHTML=`<div class="char-image-placeholder">PNG / JPG<br>캐릭터 사진 업로드</div>`;
+  const name=card.querySelector('[data-k="name"]')?.value||'?';
+  card.querySelector('.char-head-avatar').innerHTML=`<span>${esc((name||'?')[0]||'?')}</span>`;
+  saveState();
 }
 function handleTagKey(e){if(e.key==='Enter'||e.key===','){e.preventDefault();const val=e.target.value.trim().replace(/^#/,'');if(!val)return;const wrap=e.target.closest('.tag-input-wrap');const pill=document.createElement('span');pill.className='tag-pill';pill.innerHTML=`${esc(val)}<span class="tag-pill-x" onclick="removeTag(this)">×</span>`;wrap.insertBefore(pill,e.target);e.target.value='';}}
 function removeTag(x){x.closest('.tag-pill').remove();}
@@ -1490,15 +2297,399 @@ function renderSVG(){
   });
 }
 
+
+let relationBoardState = {nodes:[],links:[]};
+let relBoardSelectedId = '';
+let relBoardDrag = null;
+let relBoardResize = null;
+
+function genId(prefix='id'){
+  return prefix + '_' + Math.random().toString(36).slice(2,10);
+}
+function getCharacterNames(){
+  return [...document.querySelectorAll('.char-card [data-k="name"]')].map(i=>i.value.trim()).filter(Boolean);
+}
+function getRelationBoardState(){
+  return JSON.parse(JSON.stringify(relationBoardState||{nodes:[],links:[]}));
+}
+function initRelationBoard(data){
+  relationBoardState = {
+    nodes: Array.isArray(data?.nodes) ? data.nodes.map(n=>({...n})) : [],
+    links: Array.isArray(data?.links) ? data.links.map(l=>({...l})) : []
+  };
+  relBoardSyncCharacterNames();
+  renderRelationBoard();
+}
+function relBoardSyncCharacterNames(){
+  if(!relationBoardState) relationBoardState={nodes:[],links:[]};
+  const names=getCharacterNames();
+  relationBoardState.nodes.forEach(n=>{
+    if(n.type==='char' && !n.title) n.title = names[0]||'인물';
+  });
+  renderRelationBoardLinks();
+  renderRelationBoardSelectedEditor();
+}
+function relBoardImportCharacters(){
+  const existing = new Set((relationBoardState.nodes||[]).filter(n=>n.type==='char').map(n=>n.title));
+  let added=0;
+  getCharacterNames().forEach((name,idx)=>{
+    if(existing.has(name)) return;
+    relationBoardState.nodes.push({
+      id:genId('rbn'), type:'char', title:name, body:'',
+      x:60 + (idx%4)*220, y:60 + Math.floor(idx/4)*140, w:180, h:90, color:'#1c1a17'
+    });
+    added++;
+  });
+  renderRelationBoard();
+  if(added) saveState();
+}
+function relBoardAddCharNode(){
+  relationBoardState.nodes.push({
+    id:genId('rbn'), type:'char', title:getCharacterNames()[0]||'새 인물', body:'',
+    x:90,y:90,w:180,h:90,color:'#1c1a17'
+  });
+  relBoardSelectedId = relationBoardState.nodes.at(-1).id;
+  renderRelationBoard();
+  saveState();
+}
+function relBoardAddTextNode(){
+  relationBoardState.nodes.push({
+    id:genId('rbn'), type:'text', title:'관계 메모', body:'텍스트를 적어주세요',
+    x:180,y:180,w:220,h:130,color:'#808080'
+  });
+  relBoardSelectedId = relationBoardState.nodes.at(-1).id;
+  renderRelationBoard();
+  saveState();
+}
+function relBoardAddLink(){
+  const chars = relationBoardState.nodes.filter(n=>n.type==='char');
+  const from = chars[0]?.id || relationBoardState.nodes[0]?.id || '';
+  const to = chars[1]?.id || relationBoardState.nodes[1]?.id || from;
+  relationBoardState.links.push({
+    id:genId('rbl'), from, to, label:'관계', color:'#9c9890', style:'solid', direction:'one'
+  });
+  renderRelationBoard();
+  saveState();
+}
+function relBoardDeleteNode(id){
+  relationBoardState.nodes = relationBoardState.nodes.filter(n=>n.id!==id);
+  relationBoardState.links = relationBoardState.links.filter(l=>l.from!==id && l.to!==id);
+  if(relBoardSelectedId===id) relBoardSelectedId='';
+  renderRelationBoard();
+  saveState();
+}
+function relBoardDeleteLink(id){
+  relationBoardState.links = relationBoardState.links.filter(l=>l.id!==id);
+  renderRelationBoard();
+  saveState();
+}
+function relBoardSelect(id){
+  relBoardSelectedId = id;
+  renderRelationBoard();
+}
+function renderRelationBoard(){
+  const stage=document.getElementById('rel-board-stage');
+  if(!stage) return;
+  [...stage.querySelectorAll('.rel-board-item')].forEach(el=>el.remove());
+  (relationBoardState.nodes||[]).forEach(node=>{
+    const el=document.createElement('div');
+    el.className=`rel-board-item ${node.type==='char'?'rel-board-char':'rel-board-text'} ${relBoardSelectedId===node.id?'selected':''}`;
+    el.style.left=(node.x||60)+'px';
+    el.style.top=(node.y||60)+'px';
+    el.style.width=(node.w || (node.type==='char'?132:180))+'px';
+    el.style.height=(node.h || (node.type==='char'?72:100))+'px';
+    el.style.borderLeftColor=node.color||'#1c1a17';
+    el.dataset.id=node.id;
+    el.innerHTML = node.type==='char'
+      ? `<div class="name">${esc(node.title||'인물')}</div><div class="meta">${esc(node.body||'')}</div><div class="rb-handle">⋰</div><div class="rb-resize-handle" title="크기 조절"></div>`
+      : `<div class="title">${esc(node.title||'메모')}</div><div class="body">${esc(node.body||'')}</div><div class="rb-handle">⋰</div><div class="rb-resize-handle" title="크기 조절"></div>`;
+    el.addEventListener('mousedown',e=>relBoardStartDrag(e,node.id));
+    const resizeHandle = el.querySelector('.rb-resize-handle');
+    if(resizeHandle) resizeHandle.addEventListener('mousedown',e=>relBoardStartResize(e,node.id));
+    el.addEventListener('click',e=>{e.stopPropagation(); relBoardSelect(node.id);});
+    stage.appendChild(el);
+  });
+  stage.onclick = ()=>{ relBoardSelectedId=''; renderRelationBoardSelectedEditor(); document.querySelectorAll('.rel-board-item').forEach(n=>n.classList.remove('selected')); };
+  renderRelationBoardLines();
+  renderRelationBoardSelectedEditor();
+  renderRelationBoardLinks();
+}
+function relBoardStartDrag(e,id){
+  if(e.target.closest('input,textarea,select,button,.rb-resize-handle')) return;
+  const node=relationBoardState.nodes.find(n=>n.id===id);
+  if(!node) return;
+  const stage=document.getElementById('rel-board-stage');
+  const rect=stage.getBoundingClientRect();
+  relBoardDrag = {
+    id,
+    offsetX: e.clientX - rect.left - (node.x||0) + stage.parentElement.scrollLeft,
+    offsetY: e.clientY - rect.top - (node.y||0) + stage.parentElement.scrollTop
+  };
+  relBoardSelectedId = id;
+  renderRelationBoardSelectedEditor();
+  document.addEventListener('mousemove', relBoardOnDrag);
+  document.addEventListener('mouseup', relBoardEndDrag);
+}
+function relBoardOnDrag(e){
+  if(!relBoardDrag) return;
+  const stage=document.getElementById('rel-board-stage');
+  const rect=stage.getBoundingClientRect();
+  const node=relationBoardState.nodes.find(n=>n.id===relBoardDrag.id);
+  if(!node) return;
+  node.x = Math.max(0, Math.round(e.clientX - rect.left - relBoardDrag.offsetX + stage.parentElement.scrollLeft));
+  node.y = Math.max(0, Math.round(e.clientY - rect.top - relBoardDrag.offsetY + stage.parentElement.scrollTop));
+  renderRelationBoard();
+}
+function relBoardEndDrag(){
+  if(!relBoardDrag) return;
+  relBoardDrag=null;
+  document.removeEventListener('mousemove', relBoardOnDrag);
+  document.removeEventListener('mouseup', relBoardEndDrag);
+  saveState();
+}
+
+function relBoardStartResize(e,id){
+  e.preventDefault();
+  e.stopPropagation();
+  const node=relationBoardState.nodes.find(n=>n.id===id);
+  if(!node) return;
+  relBoardResize = {
+    id,
+    startX:e.clientX,
+    startY:e.clientY,
+    startW:node.w || (node.type==='char'?132:180),
+    startH:node.h || (node.type==='char'?72:100)
+  };
+  relBoardSelectedId = id;
+  document.addEventListener('mousemove', relBoardOnResize);
+  document.addEventListener('mouseup', relBoardEndResize);
+}
+function relBoardOnResize(e){
+  if(!relBoardResize) return;
+  const node=relationBoardState.nodes.find(n=>n.id===relBoardResize.id);
+  if(!node) return;
+  const minW = node.type==='char'?96:130;
+  const minH = node.type==='char'?56:72;
+  node.w = Math.max(minW, relBoardResize.startW + (e.clientX - relBoardResize.startX));
+  node.h = Math.max(minH, relBoardResize.startH + (e.clientY - relBoardResize.startY));
+  renderRelationBoard();
+}
+function relBoardEndResize(){
+  if(!relBoardResize) return;
+  relBoardResize=null;
+  document.removeEventListener('mousemove', relBoardOnResize);
+  document.removeEventListener('mouseup', relBoardEndResize);
+  saveState();
+}
+function relBoardNodeCenter(node){
+  return {
+    x:(node.x||0) + (node.w || (node.type==='char'?132:180))/2,
+    y:(node.y||0) + (node.h || (node.type==='char'?72:100))/2
+  };
+}
+function renderRelationBoardLines(){
+  const svg=document.getElementById('rel-board-svg');
+  const stage=document.getElementById('rel-board-stage');
+  if(!svg || !stage) return;
+  const w=stage.offsetWidth || 1200;
+  const h=stage.offsetHeight || 900;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.innerHTML = `<defs>
+    <marker id="rb-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 z" fill="#9c9890"></path>
+    </marker>
+    <marker id="rb-arrow-dark" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 z" fill="#1c1a17"></path>
+    </marker>
+  </defs>`;
+  (relationBoardState.links||[]).forEach(link=>{
+    const from=relationBoardState.nodes.find(n=>n.id===link.from);
+    const to=relationBoardState.nodes.find(n=>n.id===link.to);
+    if(!from || !to) return;
+    const a=relBoardNodeCenter(from), b=relBoardNodeCenter(to);
+    const color=link.color||'#9c9890';
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',a.x); line.setAttribute('y1',a.y);
+    line.setAttribute('x2',b.x); line.setAttribute('y2',b.y);
+    line.setAttribute('stroke',color);
+    line.setAttribute('stroke-width','2');
+    if(link.style==='dashed') line.setAttribute('stroke-dasharray','8 6');
+    if(link.direction==='one' || link.direction==='both') line.setAttribute('marker-end','url(#rb-arrow)');
+    if(link.direction==='both') line.setAttribute('marker-start','url(#rb-arrow)');
+    svg.appendChild(line);
+    if(link.label){
+      const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x',(a.x+b.x)/2);
+      txt.setAttribute('y',(a.y+b.y)/2 - 8);
+      txt.setAttribute('text-anchor','middle');
+      txt.setAttribute('font-family','IBM Plex Mono,monospace');
+      txt.setAttribute('font-size','10');
+      txt.setAttribute('fill',color);
+      txt.textContent=link.label;
+      svg.appendChild(txt);
+    }
+  });
+}
+function renderRelationBoardSelectedEditor(){
+  const wrap=document.getElementById('rel-board-selected-editor');
+  if(!wrap) return;
+  const node=relationBoardState.nodes.find(n=>n.id===relBoardSelectedId);
+  if(!node){
+    wrap.innerHTML = `<div class="rel-board-note">캔버스에서 노드나 텍스트 박스를 선택하면 이곳에서 제목, 색, 메모를 편집할 수 있어요.</div>`;
+    return;
+  }
+  const charOptions = getCharacterNames().map(n=>`<option value="${esc(n)}" ${n===node.title?'selected':''}>${esc(n)}</option>`).join('');
+  wrap.innerHTML = `
+    <div class="field"><label class="field-label">${node.type==='char'?'인물 이름':'텍스트 박스 제목'}</label>
+      ${node.type==='char'
+        ? `<input class="f-input" value="${esc(node.title||'')}" list="rel-board-char-names" oninput="relBoardPatchNode('${node.id}','title',this.value)">`
+        : `<input class="f-input" value="${esc(node.title||'')}" oninput="relBoardPatchNode('${node.id}','title',this.value)">`}
+    </div>
+    <div class="field"><label class="field-label">${node.type==='char'?'설명':'내용'}</label>
+      <textarea class="f-input md" oninput="relBoardPatchNode('${node.id}','body',this.value)">${esc(node.body||'')}</textarea>
+    </div>
+    <div class="two-col">
+      <div class="field"><label class="field-label">색상</label><input type="color" class="f-input" style="height:40px;padding:4px;" value="${esc(node.color||'#1c1a17')}" oninput="relBoardPatchNode('${node.id}','color',this.value)"></div>
+      <div class="field"><label class="field-label">폭</label><input type="number" class="f-input mono" min="96" max="380" value="${node.w|| (node.type==='char'?132:180)}" oninput="relBoardPatchNode('${node.id}','w',parseInt(this.value||0,10)||${node.type==='char'?132:180})"></div>
+    </div>
+    <div class="two-col">
+      <div class="field"><label class="field-label">높이</label><input type="number" class="f-input mono" min="56" max="320" value="${node.h|| (node.type==='char'?72:100)}" oninput="relBoardPatchNode('${node.id}','h',parseInt(this.value||0,10)||${node.type==='char'?72:100})"></div>
+      <div class="field"><label class="field-label">X</label><input type="number" class="f-input mono" value="${node.x||0}" oninput="relBoardPatchNode('${node.id}','x',parseInt(this.value||0,10)||0)"></div>
+    </div>
+    <div class="two-col">
+      <div class="field"><label class="field-label">Y</label><input type="number" class="f-input mono" value="${node.y||0}" oninput="relBoardPatchNode('${node.id}','y',parseInt(this.value||0,10)||0)"></div>
+      <div class="field"><label class="field-label">크기 조절</label><div class="rel-board-note">노드 오른쪽 아래 모서리를 드래그하면 바로 줄이거나 늘릴 수 있어요.</div></div>
+    </div>
+    <button class="btn-del" type="button" onclick="relBoardDeleteNode('${node.id}')">이 항목 삭제</button>
+    <datalist id="rel-board-char-names">${charOptions}</datalist>
+  `;
+}
+function relBoardPatchNode(id,key,val){
+  const node=relationBoardState.nodes.find(n=>n.id===id);
+  if(!node) return;
+  node[key]=val;
+  renderRelationBoard();
+  saveState();
+}
+function renderRelationBoardLinks(){
+  const wrap=document.getElementById('rel-link-list');
+  if(!wrap) return;
+  const nameOf=id=>relationBoardState.nodes.find(n=>n.id===id)?.title || '미지정';
+  const options=relationBoardState.nodes.map(n=>`<option value="${n.id}">${esc(n.title||'이름없음')} (${n.type==='char'?'인물':'텍스트'})</option>`).join('');
+  if(!(relationBoardState.links||[]).length){
+    wrap.innerHTML = `<div class="rel-board-note">연결선을 추가하면 여기서 색상, 점선, 방향, 텍스트를 바꿀 수 있어요.</div>`;
+    return;
+  }
+  wrap.innerHTML = relationBoardState.links.map(link=>`
+    <div class="rel-link-card">
+      <div class="rel-link-top"><strong>${esc(nameOf(link.from))}</strong><span>→</span><strong>${esc(nameOf(link.to))}</strong><button class="btn-del" style="margin-left:auto;" onclick="relBoardDeleteLink('${link.id}')">삭제</button></div>
+      <div class="two-col">
+        <div class="field"><label class="field-label">시작</label><select class="f-input mono" onchange="relBoardPatchLink('${link.id}','from',this.value)">${relationBoardState.nodes.map(n=>`<option value="${n.id}" ${n.id===link.from?'selected':''}>${esc(n.title||'이름없음')}</option>`).join('')}</select></div>
+        <div class="field"><label class="field-label">끝</label><select class="f-input mono" onchange="relBoardPatchLink('${link.id}','to',this.value)">${relationBoardState.nodes.map(n=>`<option value="${n.id}" ${n.id===link.to?'selected':''}>${esc(n.title||'이름없음')}</option>`).join('')}</select></div>
+      </div>
+      <div class="two-col">
+        <div class="field"><label class="field-label">텍스트</label><input class="f-input" value="${esc(link.label||'')}" oninput="relBoardPatchLink('${link.id}','label',this.value)"></div>
+        <div class="field"><label class="field-label">색상</label><input type="color" class="f-input" style="height:40px;padding:4px;" value="${esc(link.color||'#9c9890')}" oninput="relBoardPatchLink('${link.id}','color',this.value)"></div>
+      </div>
+      <div class="rel-link-mini">
+        <div class="field"><label class="field-label">선 종류</label>
+          <select class="f-input mono" onchange="relBoardPatchLink('${link.id}','style',this.value)">
+            <option value="solid" ${link.style==='solid'?'selected':''}>실선</option>
+            <option value="dashed" ${link.style==='dashed'?'selected':''}>점선</option>
+          </select>
+        </div>
+        <div class="field"><label class="field-label">방향</label>
+          <select class="f-input mono" onchange="relBoardPatchLink('${link.id}','direction',this.value)">
+            <option value="none" ${link.direction==='none'?'selected':''}>방향 없음</option>
+            <option value="one" ${link.direction==='one'?'selected':''}>단방향</option>
+            <option value="both" ${link.direction==='both'?'selected':''}>양방향</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function relBoardPatchLink(id,key,val){
+  const link=relationBoardState.links.find(l=>l.id===id);
+  if(!link) return;
+  link[key]=val;
+  renderRelationBoard();
+  saveState();
+}
+
 /* ══════════════════════════════════
    BEATSHEET — 3막 드래그앤드롭
 ══════════════════════════════════ */
-const ACTS=[
+let ACTS=[
   {id:'act1',label:'1막',sub:'설정 · 발단',color:'#f5f3ee'},
   {id:'act2a',label:'2막 A',sub:'갈등 상승',color:'#f3f0f8'},
   {id:'act2b',label:'2막 B',sub:'최저점 · 반전',color:'#f8f0f0'},
   {id:'act3',label:'3막',sub:'클라이맥스 · 결말',color:'#f0f5f0'}
 ];
+function normalizeBeatActs(arr){
+  const fallback=[
+    {id:'act1',label:'1막',sub:'설정 · 발단',color:'#f5f3ee'},
+    {id:'act2a',label:'2막 A',sub:'갈등 상승',color:'#f3f0f8'},
+    {id:'act2b',label:'2막 B',sub:'최저점 · 반전',color:'#f8f0f0'},
+    {id:'act3',label:'3막',sub:'클라이맥스 · 결말',color:'#f0f5f0'}
+  ];
+  const base=(Array.isArray(arr)&&arr.length?arr:fallback).map((a,i)=>({
+    id:String(a.id||('act'+(i+1))),
+    label:String(a.label||('구간 '+(i+1))),
+    sub:String(a.sub||''),
+    color:String(a.color||fallback[i%fallback.length].color)
+  }));
+  const seen=new Set();
+  base.forEach((a,i)=>{ let id=a.id.replace(/[^a-zA-Z0-9_-]/g,'') || ('act'+(i+1)); while(seen.has(id)) id=id+'_'+(i+1); a.id=id; seen.add(id);});
+  return base;
+}
+function beatSnapshot(){
+  const beats={};
+  ACTS.forEach(act=>{
+    const zone=document.querySelector(`.beat-drop-zone[data-act="${act.id}"]`);
+    beats[act.id]=zone?[...zone.querySelectorAll('.beat-card')].map(c=>({
+      ep:c.querySelector('.beat-card-ep-inp')?.value||'',
+      title:c.querySelector('.beat-card-title')?.value||'',
+      purpose:c.querySelector('[data-f="purpose"]')?.value||'',
+      emotion:c.querySelector('[data-f="emotion"]')?.value||'',
+      type:c.dataset.type||'setup'
+    })):[...((S.beats||{})[act.id]||[])];
+  });
+  return beats;
+}
+function restoreBeatSnapshot(snapshot){
+  ACTS.forEach(act=>((snapshot&&snapshot[act.id])||[]).forEach(b=>addBeatCard(b,act.id)));
+  updateActCounts();updateBadges();
+}
+function rerenderBeatCanvas(snapshot){
+  buildBeatCanvas();
+  restoreBeatSnapshot(snapshot||{});
+  saveState();
+}
+function addBeatAct(){
+  const snapshot=beatSnapshot();
+  let idx=ACTS.length+1;
+  let id='act'+idx;
+  while(ACTS.some(a=>a.id===id)){idx++;id='act'+idx;}
+  const palette=['#f5f3ee','#f3f0f8','#f8f0f0','#f0f5f0','#eef5f6','#f7f2e8'];
+  ACTS.push({id, label:'새 구간', sub:'설명 입력', color:palette[(ACTS.length)%palette.length]});
+  rerenderBeatCanvas(snapshot);
+}
+function updateBeatAct(actId,key,val){
+  const act=ACTS.find(a=>a.id===actId); if(!act) return;
+  act[key]=val;
+  saveState();
+}
+function deleteBeatAct(actId){
+  if(ACTS.length<=1){ toast('마지막 구간은 삭제할 수 없어요'); return; }
+  const snapshot=beatSnapshot();
+  const idx=ACTS.findIndex(a=>a.id===actId); if(idx<0) return;
+  const fallback=ACTS[idx-1]?.id || ACTS[idx+1]?.id;
+  if(snapshot[actId]?.length){ snapshot[fallback]=[...(snapshot[fallback]||[]), ...(snapshot[actId]||[])]; }
+  delete snapshot[actId];
+  ACTS=ACTS.filter(a=>a.id!==actId);
+  rerenderBeatCanvas(snapshot);
+}
 const EP_TYPES=[
   {id:'romance',label:'로맨스',color:'var(--c-romance)',border:'var(--cb-romance)'},
   {id:'conflict',label:'갈등',color:'var(--c-conflict)',border:'var(--cb-conflict)'},
@@ -1513,7 +2704,7 @@ function buildBeatCanvas(){
   ACTS.forEach(act=>{
     const block=document.createElement('div');block.className='act-block';
     block.style.background=act.color;block.style.flex='1';
-    block.innerHTML=`<div class="act-header"><span class="act-label">${act.label}</span><span class="act-ep-count" id="${act.id}-count">0</span><span style="color:var(--ink4);font-size:10px;font-family:var(--font-m);">${act.sub}</span><button class="page-action" style="padding:3px 9px;font-size:10px;margin-left:auto;" onclick="addBeatCard({},\'${act.id}\')">+</button></div><div class="beat-drop-zone" data-act="${act.id}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>`;
+    block.innerHTML=`<div class="act-header" style="gap:8px;flex-wrap:wrap;align-items:center;"><input class="inline-inp" style="width:96px;font-family:var(--font-m);font-size:11px;font-weight:700;" placeholder="구간명" value="${esc(act.label||'')}" oninput="updateBeatAct('${act.id}','label',this.value)"><input class="inline-inp" style="min-width:120px;flex:1;font-size:10px;color:var(--ink4);font-family:var(--font-m);" placeholder="구간 설명" value="${esc(act.sub||'')}" oninput="updateBeatAct('${act.id}','sub',this.value)"><span class="act-ep-count" id="${act.id}-count">0</span><input type="color" title="구간 색상" style="width:28px;height:24px;padding:0;border:1px solid var(--rule);border-radius:4px;background:transparent;cursor:pointer;" value="${esc(act.color||'#f5f3ee')}" oninput="updateBeatAct('${act.id}','color',this.value); rerenderBeatCanvas(beatSnapshot())"><button class="page-action ghost" title="구간 삭제" style="padding:3px 8px;font-size:10px;" onclick="deleteBeatAct('${act.id}')">삭제</button><button class="page-action" style="padding:3px 9px;font-size:10px;" onclick="addBeatCard({},\'${act.id}\')">카드+</button></div><div class="beat-drop-zone" data-act="${act.id}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"></div>`;
     row.appendChild(block);
   });
   buildEpLegend();
@@ -1636,8 +2827,10 @@ const BEAT_TEMPLATE=[
 ];
 function addBeatTemplate(){
   if(document.querySelectorAll('.beat-card').length>0&&!confirm('기존 카드에 템플릿을 추가할까요?'))return;
-  BEAT_TEMPLATE.forEach(b=>addBeatCard(b,b.act));
-  toast('Blake Snyder 15비트 템플릿 삽입 완료');
+  const slots=ACTS.map(a=>a.id);
+  const mapper={act1:slots[0]||'act1',act2a:slots[1]||slots[0]||'act1',act2b:slots[2]||slots[1]||slots[0]||'act1',act3:slots[3]||slots[slots.length-1]||'act1'};
+  BEAT_TEMPLATE.forEach(b=>addBeatCard({...b},mapper[b.act]||slots[0]||'act1'));
+  toast('비트시트 템플릿 삽입 완료');
 }
 
 /* ══════════════════════════════════
@@ -1649,12 +2842,12 @@ function addFrag(data={}){
   const id=data.id||('frag-'+fragIdCounter);
   const list=document.getElementById('frag-list');
   const card=document.createElement('div');
-  card.className='frag-card card';card.dataset.fragId=id;card.id=id;
+  card.className='frag-card card';card.dataset.fragId=id;card.id=id; if(data.source) card.dataset.source=data.source; if(data.eventId) card.dataset.eventId=data.eventId;
   card.innerHTML=`
     <div class="card-header">
       <span style="font-size:10px;font-family:var(--font-m);color:var(--ink4);">Ep.</span>
       <input style="width:40px;background:transparent;border:none;outline:none;font-family:var(--font-m);font-size:11px;color:var(--ink3);" data-k="ep" placeholder="화" value="${esc(data.ep||'')}">
-      <input style="flex:1;background:transparent;border:none;outline:none;font-family:var(--font-s);font-size:13px;font-weight:600;color:var(--ink);" data-k="title" placeholder="장면 제목" value="${esc(data.title||'')}">
+      <input style="flex:1;background:transparent;border:none;outline:none;font-family:var(--font-s);font-size:13px;font-weight:600;color:var(--ink);" data-k="title" placeholder="장면 제목" value="${esc(data.title||'')}">${data.source==='timeline'?'<span class="frag-source-badge">사건 카드 연결</span>':(data.source==='writing-mode'?'<span class="frag-source-badge wm-source">쓰기 카드 연결</span>':'')}
       <input style="width:90px;background:var(--bg2);border:1px solid var(--rule);border-radius:3px;outline:none;font-family:var(--font-m);font-size:10px;color:var(--ink3);padding:2px 7px;" data-k="arc" placeholder="아크" value="${esc(data.arc||'')}">
       <button class="btn-del" onclick="this.closest('.frag-card').remove();updateBadges();rebuildHashFilters();updateAnalysisManuChips();">삭제</button>
     </div>
@@ -1680,7 +2873,7 @@ function addFrag(data={}){
       <hr class="section-rule" style="margin:0;">
       <div class="field">
         <label class="field-label">📝 메모 · 아이디어 (#해시태그로 키워드 연결)</label>
-        <textarea class="frag-memo-ta" placeholder="#해시태그 로 키워드를 달아두세요. 태그에 마우스를 올리면 같은 태그의 다른 조각을 미리볼 수 있습니다.&#10;예) #복선 #감정폭발 #윤정 #준리 #소품_물병&#10;장면 메모, 아이디어, 대사 스케치 등 자유롭게 기록">${esc(data.memo||'')}</textarea>
+        <textarea class="frag-memo-ta" placeholder="#해시태그 로 키워드를 달아두세요. 태그에 마우스를 올리면 같은 태그의 다른 조각을 미리볼 수 있습니다.&#10;예) #복선 #감정폭발 #주인공A #주인공B #상징소품&#10;장면 메모, 아이디어, 대사 스케치 등 자유롭게 기록">${esc(data.memo||'')}</textarea>
         <div class="frag-tags-row"></div>
       </div>
     </div>`;
@@ -1759,10 +2952,147 @@ function cycleStatus(el){const next=STATUS_CYCLE[(STATUS_CYCLE.indexOf(el.datase
 /* ══════════════════════════════════
    MANUSCRIPT — 프리뷰 + 집필 분리
 ══════════════════════════════════ */
+const MANU_FIXED_TEMPLATES = [
+  {
+    id:'tpl-basic',
+    type:'template',
+    label:'기본 회차',
+    content:`[기본 회차 템플릿]
+
+[회차 제목]
+-
+
+[이번 화의 핵심 목적]
+- 이 화에서 독자에게 반드시 전달해야 하는 것:
+
+[시작 장면]
+- 어디서 시작하는지:
+- 누가 먼저 등장하는지:
+- 시작 톤:
+
+[주요 사건]
+1.
+2.
+3.
+
+[감정 변화]
+- 시작 감정:
+- 중간 흔들림:
+- 마지막 감정:
+
+[관계 변화]
+- 인물 A →
+- 인물 B →
+
+[반드시 남길 정보]
+- 이번 화에서 심어야 하는 정보 / 떡밥:
+
+[마지막 문장 / 훅]
+- 다음 화를 열 마지막 한 줄:`
+  },
+  {
+    id:'tpl-romance',
+    type:'template',
+    label:'로맨스',
+    content:`[로맨스 회차 템플릿]
+
+[로맨스 회차 목표]
+- 두 사람의 관계에서 이번 화가 맡는 역할:
+
+[접촉 포인트]
+- 시선:
+- 거리:
+- 말투 변화:
+- 신체 접촉 / 스침:
+
+[겉으로 드러난 행동]
+1.
+2.
+3.
+
+[속으로 일어난 감정]
+- A의 숨긴 감정:
+- B의 숨긴 감정:
+
+[오해 / 긴장 / 설렘 포인트]
+- 독자가 알아차릴 포인트:
+- 당사자는 아직 모르는 포인트:
+
+[관계 진전]
+- 이 화 전:
+- 이 화 후:
+
+[엔딩 훅]
+- 설렘 / 불안 / 오해 중 어떤 결로 마칠지:`
+  },
+  {
+    id:'tpl-conflict',
+    type:'template',
+    label:'갈등',
+    content:`[갈등 회차 템플릿]
+
+[갈등 회차 목표]
+- 이번 화에서 어떤 충돌을 분명히 보여줄지:
+
+[갈등의 표면]
+- 겉으로 드러나는 문제:
+
+[갈등의 본질]
+- 실제로 부딪히는 가치 / 욕망:
+
+[장면별 압박]
+1. 시작 압박:
+2. 중간 확대:
+3. 결정적 충돌:
+
+[인물별 반응]
+- A는 어떻게 버티는가:
+- B는 어떻게 밀어붙이는가:
+- 제3자는 무엇을 오해하는가:
+
+[회수 / 복선 연결]
+- 과거 사건과 연결점:
+- 앞으로 터질 위험:
+
+[마지막 상태]
+- 관계가 더 멀어졌는지 / 임시 봉합인지 / 폭발 직전인지:`
+  },
+  {
+    id:'tpl-cliff',
+    type:'template',
+    label:'클리프행어',
+    content:`[클리프행어 템플릿]
+
+[이번 화의 한 줄 요약]
+-
+
+[독자를 붙잡을 질문]
+- 이 화를 다 읽고 독자가 궁금해야 하는 것:
+
+[초반 배치]
+- 상황을 얼마나 빨리 보여줄지:
+
+[중간 반전 / 불안]
+- 독자가 예상 못 하게 흔드는 지점:
+
+[마지막 직전 정보]
+- 엔딩 직전에 던질 단서:
+
+[마지막 한 줄]
+-
+
+[다음 화 연결 방식]
+- 감정 직결 / 사건 직결 / 대사 직결 / 반전 직결`
+  }
+];
+
 function addManuCard(data={}){
   const list=document.getElementById('manu-list');
   const card=document.createElement('div');card.className='manu-card';
   card.dataset.archives=JSON.stringify([]);
+  card.dataset.basePreview = data.preview||data.content||'';
+  card.dataset.previewRefs = JSON.stringify(data.previewRefs||[]);
+  card.dataset.currentPreview = data.currentPreview || 'base';
   card.innerHTML=`
     <div class="manu-card-head">
       <span class="manu-ep-badge">Ep.</span>
@@ -1773,14 +3103,22 @@ function addManuCard(data={}){
     <div class="manu-panels">
       <div class="manu-panel">
         <div class="manu-panel-label">
-          📄 프리뷰 — 원본 참고용
-          <span onclick="syncPreviewToDraft(this)" title="집필칸으로 복사">→ 집필칸 복사</span>
+          📄 프리뷰 — 참고 허브
+          <div class="manu-panel-label-actions">
+            <button class="manu-ref-btn" onclick="openRefPicker(this,'fragment')">+ 조각</button>
+            <button class="manu-ref-btn" onclick="openRefPicker(this,'wm')">+ 카드</button>
+            <button class="manu-ref-btn" onclick="openRefPicker(this,'manu')">+ 본문</button>
+            <button class="manu-ref-btn" onclick="syncPreviewToDraft(this)" title="집필칸으로 복사">→ 집필칸 복사</button>
+          </div>
         </div>
         <div class="manu-preview" data-content="${esc(data.preview||data.content||'')}">${renderPreviewHtml(data.preview||data.content||'')}</div>
+        <div class="manu-vsplitter" data-target="preview" title="드래그해서 프리뷰 높이 조절"></div>
+        <div class="manu-ref-tabs"></div>
       </div>
       <div class="manu-panel">
         <div class="manu-panel-label">✏️ 집필칸 — 자유 편집</div>
         <textarea class="manu-write-ta" placeholder="여기에 자유롭게 집필하세요...">${esc(data.draft||data.content||'')}</textarea>
+        <div class="manu-vsplitter" data-target="draft" title="드래그해서 집필칸 높이 조절"></div>
         <div class="manu-write-footer">
           <button class="manu-wf-btn save" onclick="saveDraft(this)">💾 저장</button>
           <button class="manu-wf-btn archive" onclick="archiveDraft(this)">📁 아카이브</button>
@@ -1794,13 +3132,59 @@ function addManuCard(data={}){
       </div>
     </div>
     <div class="manu-wordcount">0자</div>`;
+  const previewEl=card.querySelector('.manu-preview');
   const ta=card.querySelector('.manu-write-ta');
+  if(previewEl){
+    const ph=Math.max(160, parseInt(data.previewHeight||card.dataset.previewHeight||260,10) || 260);
+    previewEl.style.height=ph+'px';
+    card.dataset.previewHeight=String(ph);
+  }
+  if(ta){
+    const dh=Math.max(220, parseInt(data.draftHeight||card.dataset.draftHeight||360,10) || 360);
+    ta.style.height=dh+'px';
+    card.dataset.draftHeight=String(dh);
+  }
+  bindManuSplitters(card);
   const wc=card.querySelector('.manu-wordcount');
   ta.addEventListener('input',()=>{wc.textContent=ta.value.length.toLocaleString()+'자';});
   wc.textContent=(ta.value.length||0).toLocaleString()+'자';
   // 저장된 아카이브 복원
   if(data.archives){try{card.dataset.archives=JSON.stringify(data.archives);renderArchiveList(card);}catch(e){}}
-  list.appendChild(card);updateBadges();updateAnalysisManuChips();
+  list.appendChild(card);
+  renderManuPreviewTabs(card);
+  updateManuPreview(card);
+  updateBadges();updateAnalysisManuChips();
+}
+
+
+function bindManuSplitters(card){
+  card.querySelectorAll('.manu-vsplitter').forEach(handle=>{
+    handle.onmousedown=(e)=>{
+      e.preventDefault();
+      const targetType=handle.dataset.target;
+      const target=targetType==='preview' ? card.querySelector('.manu-preview') : card.querySelector('.manu-write-ta');
+      if(!target) return;
+      const minHeight=targetType==='preview' ? 160 : 220;
+      const maxHeight=Math.max(minHeight, window.innerHeight - 260);
+      const startY=e.clientY;
+      const startH=target.offsetHeight;
+      document.body.classList.add('manu-resizing');
+      const onMove=(ev)=>{
+        const next=Math.max(minHeight, Math.min(maxHeight, startH + (ev.clientY - startY)));
+        target.style.height=next+'px';
+        if(targetType==='preview') card.dataset.previewHeight=String(Math.round(next));
+        else card.dataset.draftHeight=String(Math.round(next));
+      };
+      const onUp=()=>{
+        document.body.classList.remove('manu-resizing');
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        saveState();
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    };
+  });
 }
 
 function saveDraft(btn){
@@ -1835,7 +3219,7 @@ function renderArchiveList(card){
   if(!archives.length){listEl.innerHTML='<div style="padding:10px 12px;font-size:11px;color:var(--ink4);font-family:var(--font-m);">아카이브 없음</div>';return;}
   archives.forEach((a,i)=>{
     const item=document.createElement('div');item.className='archive-item';
-    item.innerHTML=`<span class="archive-item-time">${esc(a.time)}</span><span class="archive-item-preview">${esc(a.text.slice(0,60))}</span><span class="archive-item-restore" onclick="restoreArchive(this,${i})">복원</span>`;
+    item.innerHTML=`<span class="archive-item-time">${esc(a.time)}</span><span class="archive-item-preview">${esc(a.text.slice(0,60))}</span><span class="archive-item-actions"><button type="button" class="archive-item-restore" onclick="restoreArchive(this,${i})">복원</button><button type="button" class="archive-item-delete" onclick="deleteArchive(this,${i})">삭제</button></span>`;
     listEl.appendChild(item);
   });
 }
@@ -1847,7 +3231,20 @@ function restoreArchive(btn,idx){
   if(!confirm('집필칸의 현재 내용을 이 버전으로 덮어쓸까요?'))return;
   const ta=card.querySelector('.manu-write-ta');
   ta.value=archives[idx].text;ta.dispatchEvent(new Event('input'));
+  saveState();
   toast('아카이브 복원 완료');
+}
+
+function deleteArchive(btn,idx){
+  const card=btn.closest('.manu-card');
+  let archives=[];try{archives=JSON.parse(card.dataset.archives||'[]');}catch(e){}
+  if(!archives[idx])return;
+  if(!confirm('이 아카이브 버전을 삭제할까요?'))return;
+  archives.splice(idx,1);
+  card.dataset.archives=JSON.stringify(archives);
+  renderArchiveList(card);
+  saveState();
+  toast('아카이브에서 삭제했어요');
 }
 
 function copyDraftText(btn){
@@ -1983,6 +3380,7 @@ function updateBadges(){
   set('nb-char',document.querySelectorAll('.char-card').length);
   const totalBeats=document.querySelectorAll('.beat-card').length;
   set('nb-beat',totalBeats);
+  set('nb-tline',(S.timelineEvents||[]).length);
   set('nb-frag',document.querySelectorAll('.frag-card').length);
   set('nb-fs',document.querySelectorAll('#fs-body tr').length);
   set('nb-manu',document.querySelectorAll('.manu-card').length);
@@ -2015,6 +3413,7 @@ function buildPackage(){
     characters:S.characters,
     relations:{list:S.relations,narrative:S.relNarrative},
     beatsheet:allBeats,
+    timeline_events:S.timelineEvents||[],
     episode_fragments:S.fragments,
     foreshadow:{items:S.foreshadow,wiki:S.wikiText},
     manuscript:S.manuscripts.map(m=>({ep:m.ep,title:m.title,content:m.draft||m.preview||''})),
@@ -2022,82 +3421,165 @@ function buildPackage(){
     incident_canvas:S.incidentCanvas||{notes:[],links:[],areas:[]},
     diagnostics:{unresolved_foreshadow:(S.foreshadow||[]).filter(f=>!f.resolved || f.status!=='resolved').length},
     world:{background:S.worldBg,rules:S.worldRules,items:S.worldItems},
-    analysis_request:{
-      scope:{ranges:S.analysisScope?.ranges||[],uploadedFiles:(S.analysisScope?.uploadedFiles||[]).map(f=>({name:f.name,content:f.content?.slice(0,3000)||''}))},
-      selected:selectedOptions.map(o=>o.title),
-      guides:selectedOptions.map(o=>o.guide).join('\n\n'),
-      custom:S.analysisCustom,
-      progress:S.analysisProgress
-    }
+    analysis_request:(()=>{
+      const scoped=getScopedManuscripts();
+      const sorted=[...scoped].sort((a,b)=>parseInt(a.ep||0,10)-parseInt(b.ep||0,10));
+      const current=sorted.length ? sorted[sorted.length-1] : null;
+      const references=sorted.filter(m=>!current || String(m.ep)!==String(current.ep));
+      const writingFeedback=S.writingMode?.feedbackSummary||{};
+      return {
+        prompt:{
+          preset:S.analysisPromptPreset||'gl_commercial',
+          preset_label:ANALYSIS_PROMPT_PRESET_LABELS[S.analysisPromptPreset||'gl_commercial']||'커스텀',
+          text:S.analysisPromptText||(ANALYSIS_PROMPT_PRESETS[S.analysisPromptPreset||'gl_commercial']||'')
+        },
+        scope:{
+          ranges:S.analysisScope?.ranges||[],
+          uploadedFiles:(S.analysisScope?.uploadedFiles||[]).map(f=>({name:f.name,content:f.content?.slice(0,3000)||''}))
+        },
+        scoped_manuscripts:scoped,
+        package_sections:{
+          current_episode: current,
+          reference_episodes: references,
+          writing_cards:(S.writingMode?.cards||[]).map(c=>({ep:c.ep,title:c.title,purpose:c.purpose,emotion:c.emotion,event:c.event,hook:c.hook,summary:c.summary})),
+          feedback_loop: writingFeedback
+        },
+        selected:selectedOptions.map(o=>o.title),
+        guides:selectedOptions.map(o=>o.guide).join('\n\n'),
+        custom:S.analysisCustom,
+        progress:S.analysisProgress
+      };
+    })()
   };
 }
 
 function buildMarkdown(pkg){
-  const O=pkg.overview||{};let md='';
-  md+=`# 스토리 패키지 — ${pkg.meta.title||'(제목 미입력)'}\n`;
-  md+=`> 생성: ${pkg.meta.generated_at} · ${pkg.meta.tool}\n\n---\n\n`;
-  md+=`## 1. 작품 개요\n\n| 항목 | 내용 |\n|---|---|\n`;
-  md+=`| 장르 | ${O.genre||'—'} |\n| 플랫폼·타겟 | ${O.target||'—'} |\n| 총 화수 | ${O.total||'—'} |\n\n`;
-  md+=`**로그라인**\n${O.logline||'—'}\n\n**핵심 메시지**\n${O.theme||'—'}\n\n**시놉시스**\n${O.synopsis||'—'}\n\n**아크 구분**\n${O.arcs||'—'}\n\n`;
-  if(O.memo)md+=`**작가 메모**\n${O.memo}\n\n`;
-  md+=`---\n\n## 2. 캐릭터 설정 (${pkg.characters.length}명)\n\n`;
+  const O=pkg.overview||{}; let md='';
+  md += `# 스토리 패키지 — ${pkg.meta.title||'(제목 미입력)'}\n`;
+  md += `> 생성: ${pkg.meta.generated_at} · ${pkg.meta.tool}\n\n---\n\n`;
+  md += `## 1. 작품 개요\n\n| 항목 | 내용 |\n|---|---|\n`;
+  md += `| 장르 | ${O.genre||'—'} |\n| 플랫폼·타겟 | ${O.target||'—'} |\n| 총 화수 | ${O.total||'—'} |\n\n`;
+  md += `**로그라인**\n${O.logline||'—'}\n\n**핵심 메시지**\n${O.theme||'—'}\n\n**시놉시스**\n${O.synopsis||'—'}\n\n**아크 구분**\n${O.arcs||'—'}\n\n`;
+  if(O.memo) md += `**작가 메모**\n${O.memo}\n\n`;
+
+  md += `---\n\n## 2. 캐릭터 설정 (${pkg.characters.length}명)\n\n`;
   pkg.characters.forEach(c=>{
-    md+=`### ${c.name||'?'} — ${c.role||''}\n\n`;
-    [['외형',c.age],['성격',c.personality],['욕망(Want)',c.desire],['결핍(Need)',c.deficiency],['트라우마',c.trauma],['목표',c.goal],['갈등',c.conflict],['말투',c.speech],['금지행동',c.forbidden],['성장호',c.growth],['메모',c.memo],['태그',(c.tags||[]).join(' ')]].forEach(([k,v])=>{if(v)md+=`- **${k}**: ${v}\n`;});md+='\n';
+    md += `### ${c.name||'?'} — ${c.role||''}\n\n`;
+    [['외형',c.age],['성격',c.personality],['욕망(Want)',c.desire],['결핍(Need)',c.deficiency],['트라우마',c.trauma],['목표',c.goal],['갈등',c.conflict],['말투',c.speech],['금지행동',c.forbidden],['성장호',c.growth],['메모',c.memo],['태그',(c.tags||[]).join(' ')]].forEach(([k,v])=>{ if(v) md += `- **${k}**: ${v}\n`; });
+    md += `\n`;
   });
-  md+=`---\n\n## 3. 관계 · 변화\n\n`;
-  pkg.relations.list.forEach(r=>{md+=`**${r.from||'?'} ─[${r.label||''}]─ ${r.to||'?'}**\n`;if(r.desc)md+=`> ${r.desc}\n`;if(r.phase)md+=`변화: ${r.phase}\n`;md+='\n';});
-  if(pkg.relations.narrative)md+=`**관계 변화 서술**\n${pkg.relations.narrative}\n\n`;
-  md+=`---\n\n## 4. 비트시트 (${pkg.beatsheet.length}개 카드)\n\n`;
+
+  md += `---\n\n## 3. 관계 · 변화\n\n`;
+  pkg.relations.list.forEach(r=>{
+    md += `**${r.from||'?'} ─[${r.label||''}]─ ${r.to||'?'}**\n`;
+    if(r.desc) md += `> ${r.desc}\n`;
+    if(r.phase) md += `변화: ${r.phase}\n`;
+    md += `\n`;
+  });
+  if(pkg.relations.narrative) md += `**관계 변화 서술**\n${pkg.relations.narrative}\n\n`;
+
+  md += `---\n\n## 4. 비트시트 (${pkg.beatsheet.length}개 카드)\n\n`;
   ['act1','act2a','act2b','act3'].forEach(act=>{
     const cards=pkg.beatsheet.filter(b=>b.act===act);
-    if(!cards.length)return;
+    if(!cards.length) return;
     const actInfo=ACTS.find(a=>a.id===act);
-    md+=`### ${actInfo?.label||act} — ${actInfo?.sub||''}\n\n`;
-    md+=`| 화 | 장면/사건 | 목적 | 감정선 | 유형 |\n|---|---|---|---|---|\n`;
-    cards.forEach(b=>md+=`| ${b.ep||''} | ${b.title||''} | ${b.purpose||''} | ${b.emotion||''} | ${b.type||''} |\n`);
-    md+='\n';
+    md += `### ${actInfo?.label||act} — ${actInfo?.sub||''}\n\n`;
+    md += `| 화 | 장면/사건 | 목적 | 감정선 | 유형 |\n|---|---|---|---|---|\n`;
+    cards.forEach(b=> md += `| ${b.ep||''} | ${b.title||''} | ${b.purpose||''} | ${b.emotion||''} | ${b.type||''} |\n`);
+    md += `\n`;
   });
-  md+=`---\n\n## 5. 에피소드 조각 (${pkg.episode_fragments.length}개)\n\n`;
+
+  md += `---\n\n## 5. 에피소드 조각 (${pkg.episode_fragments.length}개)\n\n`;
   pkg.episode_fragments.forEach(f=>{
-    const tags=(f.memo.match(/#[\w가-힣_]+/g)||[]).join(' ');
-    md+=`### Ep.${f.ep||'?'} [${f.arc||''}] ${f.title||''}\n`;
-    if(f.purpose)md+=`- **이 장면의 목적**: ${f.purpose}\n`;
-    if(f.state_change)md+=`- **변화된 상태**: ${f.state_change}\n`;
-    if(f.reveal)md+=`- **반드시 노출될 정보**: ${f.reveal}\n`;
-    if(f.hook)md+=`- **훅(HOOK)**: ${f.hook}\n`;
-    if(tags)md+=`- **태그**: ${tags}\n`;
-    if(f.memo)md+=`\n${f.memo}\n`;
-    md+='\n';
+    const tags=((f.memo||'').match(/#[\w가-힣_]+/g)||[]).join(' ');
+    md += `### Ep.${f.ep||'?'} [${f.arc||''}] ${f.title||''}\n`;
+    if(f.purpose) md += `- **이 장면의 목적**: ${f.purpose}\n`;
+    if(f.state_change) md += `- **변화된 상태**: ${f.state_change}\n`;
+    if(f.reveal) md += `- **반드시 노출될 정보**: ${f.reveal}\n`;
+    if(f.hook) md += `- **훅(HOOK)**: ${f.hook}\n`;
+    if(tags) md += `- **태그**: ${tags}\n`;
+    if(f.memo) md += `\n${f.memo}\n`;
+    md += `\n`;
   });
-  md+=`---\n\n## 6. 복선 · 회수 (${pkg.foreshadow.items.length}건)\n\n`;
-  if(pkg.foreshadow.items.length){md+=`| 복선 | 설치화 | 회수화 | 메모 | 상태 |\n|---|---|---|---|---|\n`;pkg.foreshadow.items.forEach(f=>md+=`| ${f.item||''} | ${f.planted||''} | ${f.resolved||''} | ${f.note||''} | ${f.status||''} |\n`);md+='\n';}
-  if(pkg.foreshadow.wiki)md+=`**용어 위키**\n${pkg.foreshadow.wiki}\n\n`;
-  md+=`---\n\n## 7. 원고 (${pkg.manuscript.length}화)\n\n`;
-  pkg.manuscript.forEach(m=>{md+=`### ${m.ep||'?'}화 — ${m.title||''}\n\n`;const preview=(m.content||'').slice(0,600);md+=`${preview}${(m.content||'').length>600?'\n\n[... 이하 생략]':''}\n\n`;});
-  md+=`---\n\n## 8. 세계관 · 규칙\n\n`;
-  if(pkg.world.background)md+=`**배경**\n${pkg.world.background}\n\n`;
-  if(pkg.world.rules)md+=`**규칙**\n${pkg.world.rules}\n\n`;
-  if(pkg.world.items.length){pkg.world.items.forEach(w=>md+=`- **${w.name||'?'}**: ${w.desc||''}\n`);md+='\n';}
-  md+=`---\n\n## 9. 분석 요청서\n\n`;
-  // 분석 대상 범위
-  const scope=pkg.analysis_request.scope||{};
-  if(scope.ranges&&scope.ranges.length){
-    md+=`**분석 대상 회차**\n`;
-    scope.ranges.forEach(r=>md+=`- ${r.label}\n`);
-    md+='\n';
+
+  md += `---\n\n## 6. 복선 · 회수 (${pkg.foreshadow.items.length}건)\n\n`;
+  if(pkg.foreshadow.items.length){
+    md += `| 복선 | 설치화 | 회수화 | 메모 | 상태 |\n|---|---|---|---|---|\n`;
+    pkg.foreshadow.items.forEach(f=> md += `| ${f.item||''} | ${f.planted||''} | ${f.resolved||''} | ${f.note||''} | ${f.status||''} |\n`);
+    md += `\n`;
   }
-  if(scope.uploadedFiles&&scope.uploadedFiles.length){
-    md+=`**업로드된 분석 파일**\n`;
-    scope.uploadedFiles.forEach(f=>{
-      md+=`### 파일: ${f.name}\n\`\`\`\n${(f.content||'').slice(0,2000)}${(f.content||'').length>2000?'\n... (이하 생략)':''}\n\`\`\`\n\n`;
+  if(pkg.foreshadow.wiki) md += `**용어 위키**\n${pkg.foreshadow.wiki}\n\n`;
+
+  md += `---\n\n## 7. 원고 (${pkg.manuscript.length}화)\n\n`;
+  pkg.manuscript.forEach(m=>{
+    md += `### ${m.ep||'?'}화 — ${m.title||''}\n\n`;
+    const preview=(m.content||'').slice(0,600);
+    md += `${preview}${(m.content||'').length>600?'\n\n[... 이하 생략]':''}\n\n`;
+  });
+
+  md += `---\n\n## 8. 세계관 · 규칙\n\n`;
+  if(pkg.world.background) md += `**배경**\n${pkg.world.background}\n\n`;
+  if(pkg.world.rules) md += `**규칙**\n${pkg.world.rules}\n\n`;
+  if(pkg.world.items.length){ pkg.world.items.forEach(w=> md += `- **${w.name||'?'}**: ${w.desc||''}\n`); md += `\n`; }
+
+  md += `---\n\n## 9. 분석 요청서\n\n`;
+  const scope=pkg.analysis_request.scope||{};
+  const prompt=pkg.analysis_request.prompt||{};
+  const sections=pkg.analysis_request.package_sections||{};
+  if(prompt.text){
+    md += `### 프롬프트\n\n**선택 프리셋**: ${prompt.preset_label||'커스텀'}\n\n${prompt.text}\n\n`;
+  }
+  if(scope.ranges && scope.ranges.length){
+    md += `### 분석 대상 회차\n`;
+    scope.ranges.forEach(r=> md += `- ${r.label}\n`);
+    md += `\n`;
+  }
+  if(sections.current_episode){
+    md += `### 현재 화\n\n**EP.${sections.current_episode.ep||'?'} — ${sections.current_episode.title||''}**\n\n${(sections.current_episode.content||'').trim()||'(내용 없음)'}\n\n`;
+  }
+  if((sections.reference_episodes||[]).length){
+    md += `### 참고 화\n\n`;
+    sections.reference_episodes.forEach(m=>{
+      const body=(m.content||'').trim();
+      md += `**EP.${m.ep||'?'} — ${m.title||''}**\n\n${body.slice(0,2200)}${body.length>2200?'\n\n[... 이하 생략]':''}\n\n`;
     });
   }
-  md+=`**현재 진행 상황**\n${pkg.analysis_request.progress||'—'}\n\n`;
-  if(pkg.analysis_request.selected.length){md+=`**요청 분석 항목**\n`;pkg.analysis_request.selected.forEach(s=>md+=`- ${s}\n`);md+='\n';}
-  if(pkg.analysis_request.guides){md+=`---\n\n### AI 분석 지시문\n\n${pkg.analysis_request.guides}\n\n`;}
-  if(pkg.analysis_request.custom)md+=`**추가 요청**\n${pkg.analysis_request.custom}\n\n`;
-  md+=`---\n*이 패키지를 Claude에게 전달하고, 9번 지시문을 함께 요청하세요.*\n`;
+  if((sections.writing_cards||[]).length){
+    md += `### 관련 설정 / 카드\n\n`;
+    sections.writing_cards.slice(0,8).forEach(c=>{
+      md += `- **${c.ep||'CARD'} · ${c.title||'무제'}**\n`;
+      if(c.purpose) md += `  - 목적: ${c.purpose}\n`;
+      if(c.emotion) md += `  - 감정: ${c.emotion}\n`;
+      if(c.event) md += `  - 사건: ${c.event}\n`;
+      if(c.hook) md += `  - 훅: ${c.hook}\n`;
+      if(c.summary) md += `  - 요약: ${c.summary}\n`;
+    });
+    md += `\n`;
+  }
+  if(scope.uploadedFiles && scope.uploadedFiles.length){
+    md += `### 추가 자료\n\n`;
+    scope.uploadedFiles.forEach(f=>{
+      const sample=(f.content||'').slice(0,2000);
+      md += `**파일: ${f.name}**\n\n${sample}${(f.content||'').length>2000?'\n\n[... 이하 생략]':''}\n\n`;
+    });
+  }
+  md += `### 요청 사항\n\n**현재 진행 상황**\n${pkg.analysis_request.progress||'—'}\n\n`;
+  if(pkg.analysis_request.selected.length){
+    md += `**요청 분석 항목**\n`;
+    pkg.analysis_request.selected.forEach(s=> md += `- ${s}\n`);
+    md += `\n`;
+  }
+  if(pkg.analysis_request.custom) md += `**추가 요청**\n${pkg.analysis_request.custom}\n\n`;
+  if(pkg.analysis_request.guides) md += `### 분석 옵션에서 생성된 세부 가이드\n\n${pkg.analysis_request.guides}\n\n`;
+  const fb=sections.feedback_loop||{};
+  if((fb.actions||[]).length || fb.rewritePrompt){
+    md += `### 피드백 루프 메모\n\n`;
+    if((fb.strengths||[]).length){ md += `**유지할 강점**\n`; fb.strengths.forEach(s=> md += `- ${s}\n`); md += `\n`; }
+    if((fb.issues||[]).length){ md += `**보완 포인트**\n`; fb.issues.forEach(s=> md += `- ${s}\n`); md += `\n`; }
+    if((fb.actions||[]).length){ md += `**다음 리라이팅 체크리스트**\n`; fb.actions.forEach(s=> md += `- ${s}\n`); md += `\n`; }
+    if(fb.rewritePrompt) md += `**추천 리라이팅 지시문**\n${fb.rewritePrompt}\n\n`;
+  }
+  md += `---\n*이 패키지를 그대로 붙여넣으면, 선택한 프롬프트와 분석 대상 회차 원고가 함께 전달됩니다.*\n`;
   return md;
 }
 
@@ -2166,6 +3648,157 @@ function hideHashTooltip(){
 }
 
 /* ══════════════════════════════════
+   ANALYSIS PROMPT PRESETS
+══════════════════════════════════ */
+const ANALYSIS_PROMPT_PRESETS={
+  gl_commercial:`[프롬프트]
+
+당신은 [로맨스] 장르에 특화된 전문 웹소설가이자 웹소설 PD입니다. 다음 지침을 철저히 따르고 5000자 내외의 상업 웹소설로 재작성해 주세요.
+
+[목표]
+- 초안의 핵심 스토리를 유지하되 장면 중심으로 리라이팅합니다.
+- 작품성:대중성(상업성) 비율은 4:6으로 조정합니다.
+
+1. 문체
+- 문체, 리듬, 분위기를 세련되게 다듬되 과도한 미사여구는 피합니다.
+- 문장은 매끄럽고 자연스럽게 읽히도록 정리합니다.
+
+2. 장면화 퇴고
+- 감각 묘사 1개, 행동 묘사 2개 이상 포함합니다.
+- 설명 위주 문장을 장면 중심으로 재작성합니다.
+- 전체 문장은 약 15% 압축합니다.
+
+3. 로맨스/감정
+- 캐릭터의 개성과 감정 흐름을 유지합니다.
+- 로맨스, 서스펜스, 삼각관계의 긴장감을 자연스럽게 살립니다.
+
+4. 대사
+- 관계 변화와 감정선이 드러나도록 대사를 다듬습니다.
+- 설명형 대사는 줄이고 캐릭터다운 말맛을 살립니다.
+
+5. 개연성 검토
+- 전문용어, 상황, 행동이 어색하면 의심하고 질문합니다.
+- 원작의 핵심 로맨스가 제대로 전달되는지 점검합니다.
+
+6. 결과 점검
+- 마지막 문장은 다음 화로 이어지는 훅이 되게 구성합니다.
+- 독자가 장면과 감정을 생생히 느끼도록 완성합니다.`,
+  emotion_boost:`[프롬프트]
+
+당신은 감정선 강화에 특화된 로맨스 웹소설 PD입니다. 아래 원고를 읽고 감정 흐름이 더 선명하게 전달되도록 다듬어 주세요.
+
+- 사건은 유지하고 감정선의 연결만 더 또렷하게 만듭니다.
+- 시선, 거리감, 말투 변화, 숨기는 감정을 중심으로 조정합니다.
+- 설명보다 장면과 행동으로 보여 주세요.
+- 대사는 인물 성격을 유지한 채 긴장감과 여운이 살아나게 다듬습니다.
+- 마지막은 독자가 다음 화를 바로 읽고 싶어지게 끝맺습니다.`,
+  conflict_focus:`[프롬프트]
+
+당신은 갈등 구조와 개연성 점검에 강한 웹소설 PD입니다. 아래 원고와 참고 회차를 바탕으로 갈등의 압박 구조가 더 또렷하게 드러나도록 정리해 주세요.
+
+- 갈등의 표면과 본질을 구분해 드러냅니다.
+- 인물의 행동 동기와 반응이 자연스러운지 점검합니다.
+- 정보 노출 순서, 긴장감, 오해와 충돌의 리듬을 조정합니다.
+- 필요하면 장면 순서를 약하게 재배치하되 핵심 스토리는 유지합니다.
+- 마지막 문장은 갈등의 여파가 이어지도록 구성합니다.`,
+  manuscript_analysis:`[프롬프트]
+
+당신은 웹소설과 스토리 분석에 특화된 전문가입니다. 첨부한 원고를 바탕으로 아래 기준에 따라 친절하고 명확하게 분석해 주세요.
+
+[분석 목적]
+- 작품의 구조, 감정, 상업성을 종합적으로 진단합니다.
+- 독자 반응을 예측하고 실질적인 개선 방향을 제시합니다.
+
+[분석 기준]
+1. 문체 분석: 문장의 특징, 리듬, 가독성
+2. 서사 구조: 플롯 전개 방식과 긴장 구조
+3. 인물 분석: 캐릭터 구축 방식과 매력 포인트
+4. 주제 의식: 전달되는 핵심 메시지
+5. 상징과 은유: 사용된 장치와 효과
+6. 시점과 내레이션: 시점 선택의 적절성과 몰입도
+7. 분위기와 톤: 장르적 적합성과 일관성
+8. 독자와의 상호작용: 감정 유도 방식과 흡입력
+9. 독자 반응 예측: 기대 반응, 이탈 가능 구간, 개선점
+10. 궁극적 지향점: 이 작품이 도달하려는 결
+11. 스타일리스틱 특징: 작가 고유의 색깔
+12. 독특한 작법과 기법: 반복되는 연출과 효과
+13. 장단점과 발전 방향: 구체적 보완 포인트 포함
+14. 유사 작가/작품 추천: 비교 가능한 스타일 제안
+15. 실험적/창의적 요소: 독창성 및 시도 분석
+16. 종합 평가: 앞으로의 발전 전략 제시
+
+[응답 방식]
+- 항목별 소제목을 붙여 정리합니다.
+- 장점과 보완점을 균형 있게 설명합니다.
+- 마지막에는 '우선 수정할 3가지'를 따로 정리합니다.`,
+  custom:''
+};
+const ANALYSIS_PROMPT_PRESET_LABELS={
+  gl_commercial:'로맨스 상업 리라이팅',
+  emotion_boost:'감정선 강화',
+  conflict_focus:'갈등/개연성 집중',
+  manuscript_analysis:'원고 분석 리포트',
+  custom:'커스텀(직접 입력)'
+};
+
+function populatePromptPresetSelect(){
+  const sel=document.getElementById('analysis-prompt-preset');
+  if(!sel||sel.dataset.ready==='1')return;
+  sel.innerHTML=Object.entries(ANALYSIS_PROMPT_PRESET_LABELS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  sel.dataset.ready='1';
+}
+function handlePromptPresetChange(){
+  const sel=document.getElementById('analysis-prompt-preset');
+  const ta=document.getElementById('analysis-prompt-text');
+  if(!sel||!ta)return;
+  const current=ta.value.trim();
+  const next=ANALYSIS_PROMPT_PRESETS[sel.value]||'';
+  const shouldReplace=!current || current===Object.values(ANALYSIS_PROMPT_PRESETS).find(v=>v===current) || confirm('현재 편집 중인 프롬프트를 선택한 프리셋으로 바꿀까요?');
+  if(shouldReplace){ta.value=next;}
+  S.analysisPromptPreset=sel.value;
+  saveState();
+}
+function resetPromptToPreset(){
+  const sel=document.getElementById('analysis-prompt-preset');
+  const ta=document.getElementById('analysis-prompt-text');
+  if(!sel||!ta)return;
+  ta.value=ANALYSIS_PROMPT_PRESETS[sel.value]||'';
+  saveState();
+  toast('선택한 프리셋으로 다시 채웠어요');
+}
+function getSelectedScopeEpisodes(){
+  const eps=new Set();
+  (analysisRanges||[]).forEach(r=>{
+    const from=parseInt(r.from,10); const to=parseInt(r.to,10);
+    if(!Number.isFinite(from)||!Number.isFinite(to))return;
+    for(let i=from;i<=to;i++)eps.add(String(i));
+  });
+  return [...eps].sort((a,b)=>parseInt(a,10)-parseInt(b,10));
+}
+function getScopedManuscripts(){
+  const selected=getSelectedScopeEpisodes();
+  if(!selected.length)return [];
+  const set=new Set(selected.map(String));
+  return (S.manuscripts||[]).filter(m=>set.has(String(m.ep||''))).map(m=>({
+    ep:m.ep,title:m.title,content:m.draft||m.preview||''
+  }));
+}
+function updateAnalysisScopePreview(){
+  const el=document.getElementById('analysis-scope-preview');
+  if(!el)return;
+  const selected=getSelectedScopeEpisodes();
+  const found=(S.manuscripts||[]).filter(m=>selected.includes(String(m.ep||'')));
+  if(!selected.length){
+    el.innerHTML='분석 대상 회차를 고르면 여기에 <strong>패키지에 함께 실릴 원고 범위</strong>가 표시됩니다.';
+    return;
+  }
+  const missing=selected.filter(ep=>!found.some(m=>String(m.ep||'')===String(ep)));
+  const current=selected.length ? selected[selected.length-1] : null;
+  const refs=selected.filter(ep=>String(ep)!==String(current));
+  el.innerHTML=`<strong>현재 화:</strong> ${current?current+'화':'미정'}${refs.length?`<br><strong>참고 화:</strong> ${refs.map(ep=>ep+'화').join(', ')}`:''}<br>${found.length?`원고 탭에서 찾은 회차 ${found.length}개가 패키지에 자동 포함됩니다.`:'현재 원고 탭에서 찾은 회차가 없습니다.'}${missing.length?`<br><span style="color:#b45309;">원고 탭에 없는 회차: ${missing.map(ep=>ep+'화').join(', ')}</span>`:''}`;
+}
+
+/* ══════════════════════════════════
    분석 대상 회차 범위
 ══════════════════════════════════ */
 let analysisRanges=[];
@@ -2179,6 +3812,8 @@ function addScopeRange(){
   if(analysisRanges.find(r=>r.label===label))return;
   analysisRanges.push({from,to,label});
   renderScopeChips();
+  updateAnalysisManuChips();
+  updateAnalysisScopePreview();
   document.getElementById('asc-from').value='';
   document.getElementById('asc-to').value='';
 }
@@ -2186,7 +3821,10 @@ function addScopeRange(){
 function removeScopeRange(idx){
   analysisRanges.splice(idx,1);
   renderScopeChips();
+  updateAnalysisManuChips();
+  updateAnalysisScopePreview();
 }
+
 
 function renderScopeChips(){
   const el=document.getElementById('asc-chips');
@@ -2207,14 +3845,16 @@ function addAnalysisFile(file){
   const reader=new FileReader();
   reader.onload=ev=>{
     analysisUploadedFiles.push({name:file.name,content:ev.target.result});
-    renderUploadedFiles();toast(`분석 파일 추가: ${file.name}`);
+    renderUploadedFiles();updateAnalysisScopePreview();toast(`분석 파일 추가: ${file.name}`);
   };
   reader.readAsText(file,'UTF-8');
 }
 function removeAnalysisFile(idx){
   analysisUploadedFiles.splice(idx,1);
   renderUploadedFiles();
+  updateAnalysisScopePreview();
 }
+
 function renderUploadedFiles(){
   const el=document.getElementById('asc-uploaded-list');
   el.innerHTML=analysisUploadedFiles.map((f,i)=>`<div class="asc-uploaded-item">${esc(f.name)}<span class="asc-uploaded-x" onclick="removeAnalysisFile(${i})">×</span></div>`).join('');
@@ -2239,7 +3879,7 @@ function toggleManuChip(el,ep){
   const idx=analysisRanges.findIndex(r=>r.from===num&&r.to===num);
   if(idx>=0){analysisRanges.splice(idx,1);}
   else{analysisRanges.push({from:num,to:num,label:`${num}화`});}
-  renderScopeChips();updateAnalysisManuChips();
+  renderScopeChips();updateAnalysisManuChips();updateAnalysisScopePreview();
 }
 
 /* ══════════════════════════════════
@@ -2289,18 +3929,155 @@ function wmRenderAnalysis(result){
   document.getElementById('wm-event').textContent=result.event||'—';
   document.getElementById('wm-hook').textContent=result.hook||'—';
 }
+function renderFeedbackList(targetId, items, emptyText){
+  const el=document.getElementById(targetId);
+  if(!el) return;
+  const arr=(items||[]).filter(Boolean);
+  if(!arr.length){
+    el.className='wm-feedback-empty';
+    el.textContent=emptyText;
+    return;
+  }
+  el.className='';
+  el.innerHTML=`<ul>${arr.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`;
+}
+function renderWritingModeFeedback(summary={}){
+  renderFeedbackList('wm-feedback-strengths', summary.strengths||[], '아직 분석 결과가 반영되지 않았습니다.');
+  renderFeedbackList('wm-feedback-issues', summary.issues||[], '수정 포인트가 여기에 정리됩니다.');
+  renderFeedbackList('wm-feedback-actions', summary.actions||[], '분석 결과를 반영하면 바로 쓸 수 있는 체크리스트가 생성됩니다.');
+  const rewriteEl=document.getElementById('wm-feedback-rewrite');
+  if(rewriteEl){
+    const txt=(summary.rewritePrompt||'').trim();
+    if(txt){
+      rewriteEl.className='wm-feedback-rewrite';
+      rewriteEl.textContent=txt;
+    } else {
+      rewriteEl.className='wm-feedback-rewrite wm-feedback-empty';
+      rewriteEl.textContent='현재 초안에 맞는 짧은 재작성 지시문이 여기에 생성됩니다.';
+    }
+  }
+}
+function wmCollectFeedbackSummary(){
+  const defaultText='현재 초안에 맞는 짧은 재작성 지시문이 여기에 생성됩니다.';
+  const rewriteRaw=document.getElementById('wm-feedback-rewrite')?.textContent||'';
+  return {
+    strengths:[...document.querySelectorAll('#wm-feedback-strengths li')].map(li=>li.textContent.trim()).filter(Boolean),
+    issues:[...document.querySelectorAll('#wm-feedback-issues li')].map(li=>li.textContent.trim()).filter(Boolean),
+    actions:[...document.querySelectorAll('#wm-feedback-actions li')].map(li=>li.textContent.trim()).filter(Boolean),
+    rewritePrompt: rewriteRaw===defaultText ? '' : rewriteRaw
+  };
+}
+function wmExtractBulletish(text, limit=4){
+  return (text||'').split(/\n+/).map(s=>s.replace(/^\s*(?:[-•*]|\d+[.)])\s*/, '').trim()).filter(s=>s.length>4).slice(0,limit);
+}
+function wmTakeSentencesByKeywords(text, keywords, limit=3){
+  const parts=(text||'').split(/(?<=[.!?。！？]|다\.)\s+|\n+/).map(s=>s.trim()).filter(Boolean);
+  const hits=parts.filter(line=>keywords.some(k=>line.includes(k)));
+  return [...new Set(hits)].slice(0,limit);
+}
+function wmParseFeedbackLoop(text){
+  const raw=(text||'').trim();
+  if(!raw) return {strengths:[],issues:[],actions:[],rewritePrompt:''};
+  const normalized=raw.replace(/\r/g,'');
+  const getSection=(patterns)=>{
+    const pattern=`(?:${patterns.join('|')})[\\s\\S]{0,6}[:：\\-]?\\n?([\\s\\S]{0,500})`;
+    const match=normalized.match(new RegExp(pattern,'i'));
+    return match ? match[1].split(/\n(?=\S)/)[0].trim() : '';
+  };
+  let strengths=wmTakeSentencesByKeywords(normalized,['장점','강점','좋은','매력','유효','잘','살아있']);
+  let issues=wmTakeSentencesByKeywords(normalized,['문제','약점','보완','부족','어색','흐릿','개선']);
+  let actions=wmTakeSentencesByKeywords(normalized,['제안','수정','강화','조정','추가','줄이','압축','보완']);
+  if(!strengths.length) strengths = wmExtractBulletish(getSection(['장점','강점','유지할 점']),4);
+  if(!issues.length) issues = wmExtractBulletish(getSection(['문제점','약점','보완점','개선점']),4);
+  if(!actions.length) actions = wmExtractBulletish(getSection(['수정 제안','개선 방향','리라이팅 제안','보완 방향','추천 수정']),5);
+  strengths = strengths.slice(0,4);
+  issues = issues.slice(0,4);
+  actions = actions.slice(0,5);
+  const purpose = issues[0] ? `보완 중심: ${issues[0].replace(/^[-•*]\s*/,'')}` : '감정선과 장면 밀도를 다시 조정';
+  const emotion = actions.find(a=>/감정|긴장|여운|설렘|거리/.test(a)) || '감정의 누적과 거리 변화를 더 분명하게';
+  const event = actions.find(a=>/사건|정보|갈등|동기|플롯/.test(a)) || '사건의 원인과 결과 연결을 선명하게';
+  const hook = actions.find(a=>/엔딩|훅|마지막|다음 화/.test(a)) || '마지막 문장을 다음 화 질문으로 연결';
+  const rewriteLines=[
+    '아래 체크리스트에 맞춰 현재 초안을 한 번 더 리라이팅하세요.',
+    strengths[0] ? `유지할 강점: ${strengths[0]}` : '',
+    `보완 포인트: ${purpose}`,
+    `감정선: ${emotion}`,
+    `사건/개연성: ${event}`,
+    `엔딩 훅: ${hook}`
+  ].filter(Boolean);
+  return {
+    strengths, issues, actions,
+    rewritePrompt: rewriteLines.join('\n- '),
+    purpose, emotion, event, hook
+  };
+}
+function wmApplyFeedbackLoop(){
+  const text=(document.getElementById('wm-feedback-input')?.value||'').trim();
+  if(!text){ toast('붙여넣은 분석 결과가 없습니다'); return; }
+  const parsed=wmParseFeedbackLoop(text);
+  renderWritingModeFeedback(parsed);
+  wmRenderAnalysis({
+    purpose: parsed.purpose || document.getElementById('wm-purpose')?.textContent || '—',
+    emotion: parsed.emotion || document.getElementById('wm-emotion')?.textContent || '—',
+    event: parsed.event || document.getElementById('wm-event')?.textContent || '—',
+    hook: parsed.hook || document.getElementById('wm-hook')?.textContent || '—'
+  });
+  S.writingMode = S.writingMode || {};
+  S.writingMode.feedbackText = text;
+  S.writingMode.feedbackSummary = parsed;
+  saveState();
+  toast('분석 결과를 쓰기모드 체크리스트로 반영했어요');
+}
+function wmInsertFeedbackChecklist(){
+  const summary=wmCollectFeedbackSummary();
+  if(!(summary.actions||[]).length && !summary.rewritePrompt){ toast('먼저 분석 결과를 반영해 주세요'); return; }
+  const lines=['[피드백 루프 체크리스트]'];
+  (summary.actions||[]).forEach(item=>lines.push(`- ${item}`));
+  if(summary.rewritePrompt){
+    lines.push('');
+    lines.push('[리라이팅 지시문]');
+    summary.rewritePrompt.split('\n').forEach(line=> lines.push(`- ${line.replace(/^[-•*]\s*/,'')}`));
+  }
+  const el=document.getElementById('wm-editor');
+  if(!el) return;
+  el.value = `${lines.join('\n')}\n\n${el.value||''}`.trim();
+  wmUpdateCount();
+  saveState();
+  toast('체크리스트를 초안 상단에 붙였어요');
+}
+function wmClearFeedbackLoop(){
+  sv('wm-feedback-input','');
+  renderWritingModeFeedback({});
+  S.writingMode = S.writingMode || {};
+  S.writingMode.feedbackText='';
+  S.writingMode.feedbackSummary={strengths:[],issues:[],actions:[],rewritePrompt:''};
+  saveState();
+  toast('피드백 루프를 비웠어요');
+}
+
+function wmEnsureCardIds(cards){
+  return (cards||[]).map((card, idx)=>{
+    const next = Object.assign({}, card||{});
+    const rawId = (next.id||'').toString().trim();
+    const rawEp = (next.ep||'').toString().trim() || String(idx+1);
+    next.id = rawId || `wm-card-${rawEp.replace(/[^\w가-힣-]+/g,'-')}-${idx+1}`;
+    return next;
+  });
+}
+
 function renderWritingModeCards(cards){
   const list=document.getElementById('wm-card-list');
   if(!list) return;
   list.innerHTML='';
-  const arr=(cards&&cards.length)?cards:[];
+  const arr=wmEnsureCardIds((cards&&cards.length)?cards:[]);
   if(arr.length===0){
     list.innerHTML='<div class="wm-empty">자동 정리된 카드가 아직 없습니다.<br>오른쪽 집필칸에 장면을 쓴 뒤 <strong>자동 정리</strong>를 눌러보세요.</div>';
     return;
   }
   arr.forEach(card=>{
     const el=document.createElement('div');
-    el.className='wm-episode-card';
+    const collapsed = (card.collapsed ?? true) !== false;
+    el.className='wm-episode-card'+(collapsed?' collapsed':'');
     el.dataset.id=card.id||'';
     el.dataset.ep=card.ep||'';
     el.dataset.purpose=card.purpose||'';
@@ -2308,16 +4085,23 @@ function renderWritingModeCards(cards){
     el.dataset.event=card.event||'';
     el.dataset.hook=card.hook||'';
     el.dataset.summary=card.summary||'';
+    el.dataset.draft=card.draft||'';
+    el.dataset.fragId=card.fragId||'';
+    el.dataset.timelineId=card.timelineId||'';
     el.dataset.source=card.source||'manual';
-    el.innerHTML=`<div class="wm-episode-top"><span class="wm-ep-badge">${esc(card.ep||'CARD')}</span><div class="wm-ep-title">${esc(card.title||'무제')}</div></div>
+    el.dataset.collapsed=collapsed?'true':'false';
+    el.innerHTML=`<div class="wm-episode-top"><span class="wm-ep-badge">${esc(card.ep||'CARD')}</span><div class="wm-ep-title">${esc(card.title||'무제')}</div>${card.fragId?'<span class="wm-source-badge">조각 연결</span>':''}${card.timelineId?'<span class="wm-source-badge">사건 연결</span>':''}</div>
       <div class="wm-ep-meta">
         <span class="wm-chip">목적</span><span class="wm-chip">${esc(card.purpose||'—')}</span>
         <span class="wm-chip">감정</span><span class="wm-chip">${esc(card.emotion||'—')}</span>
+        <span class="wm-chip">사건</span><span class="wm-chip">${esc(card.event||'—')}</span>
       </div>
-      <div class="wm-ep-text">${esc(card.summary||'').replace(/\n/g,'<br>')}</div>
+      <div class=\"wm-ep-text\">${esc(card.summary||'').replace(/\n/g,'<br>')}</div>
       <div class="wm-ep-actions">
+        <button class="wm-mini-btn wm-collapse-btn" onclick="wmToggleCardCollapse('${card.id||''}')">${collapsed?'펼치기':'접기'}</button>
         <button class="wm-mini-btn" onclick="wmUseCard('${card.id||''}')">불러오기</button>
         <button class="wm-mini-btn" onclick="wmSendToFragments('${card.id||''}')">조각으로 보내기</button>
+        <button class="wm-mini-btn" onclick="wmSendToTimeline('${card.id||''}')">사건카드 편집으로 보내기</button>
         <button class="wm-mini-btn" onclick="wmDeleteCard('${card.id||''}')">삭제</button>
       </div>`;
     list.appendChild(el);
@@ -2333,7 +4117,11 @@ function wmCollectCards(){
     event: card.dataset.event || '',
     hook: card.dataset.hook || '',
     summary: card.dataset.summary || '',
-    source: card.dataset.source || ''
+    draft: card.dataset.draft || '',
+    fragId: card.dataset.fragId || '',
+    timelineId: card.dataset.timelineId || '',
+    source: card.dataset.source || '',
+    collapsed: card.dataset.collapsed !== 'false'
   }));
 }
 function wmAutoStructure(){
@@ -2352,7 +4140,11 @@ function wmAutoStructure(){
     event: result.event,
     hook: result.hook,
     summary: result.summary,
-    source:'draft'
+    draft: text,
+    fragId:'',
+    timelineId:'',
+    source:'draft',
+    collapsed:true
   };
   cards.unshift(item);
   renderWritingModeCards(cards);
@@ -2365,7 +4157,7 @@ function wmUseCard(id){
   const item=cards.find(c=>c.id===id);
   if(!item) return;
   sv('wm-title', item.title||'');
-  sv('wm-editor', item.summary||'');
+  sv('wm-editor', item.draft||item.summary||'');
   wmRenderAnalysis(item);
   S.writingMode = S.writingMode || {};
   S.writingMode.selectedCardId = id;
@@ -2393,68 +4185,113 @@ function wmSendToFragments(id){
   const cards=wmCollectCards();
   const item=cards.find(c=>c.id===id);
   if(!item) return;
-  addFrag({
-    ep:item.ep||'',
-    title:item.title||'',
-    arc:'',
-    purpose:item.purpose||'',
-    state_change:item.emotion||'',
-    reveal:item.event||'',
-    hook:item.hook||'',
-    memo:item.summary||''
-  });
+  let frag=null;
+  if(item.fragId){
+    frag=document.getElementById(item.fragId) || document.querySelector('.frag-card[data-frag-id="'+item.fragId+'"]');
+  }
+  if(!frag){
+    addFrag({
+      ep:item.ep||'',
+      title:item.title||'',
+      arc:'',
+      purpose:item.purpose||'',
+      state_change:item.emotion||'',
+      reveal:item.event||'',
+      hook:item.hook||'',
+      memo:item.summary||'',
+      source:'writing-mode'
+    });
+    const list=[...document.querySelectorAll('.frag-card')];
+    frag=list[list.length-1]||null;
+    if(frag){ item.fragId = frag.dataset.fragId || frag.id || ''; }
+  } else {
+    const set=(sel,val)=>{ const el=frag.querySelector(sel); if(el) el.value=val||''; };
+    set('[data-k="ep"]', item.ep||'');
+    set('[data-k="title"]', item.title||'');
+    set('[data-k="purpose"]', item.purpose||'');
+    set('[data-k="state_change"]', item.emotion||'');
+    set('[data-k="reveal"]', item.event||'');
+    set('[data-k="hook"]', item.hook||'');
+    const memoEl=frag.querySelector('.frag-memo-ta'); if(memoEl) memoEl.value=item.summary||'';
+    let badge=frag.querySelector('.frag-source-badge');
+    if(!badge){
+      const tEl=frag.querySelector('[data-k="title"]');
+      if(tEl){ badge=document.createElement('span'); badge.className='frag-source-badge wm-source'; badge.textContent='쓰기 카드 연결'; tEl.insertAdjacentElement('afterend', badge); }
+    } else {
+      badge.classList.add('wm-source'); badge.textContent='쓰기 카드 연결';
+    }
+    renderFragTags(frag);
+  }
+  renderWritingModeCards(cards);
   updateBadges();
-  toast('에피소드 조각 탭으로 보냈습니다');
+  rebuildHashFilters();
+  filterFrags();
+  saveState();
+  toast('쓰기 카드의 요약을 에피소드 조각으로 보냈습니다');
 }
+function wmExtractChars(text){
+  const known=(S.characters||[]).map(c=>c.name).filter(Boolean);
+  const found=[];
+  known.forEach(name=>{ if(text.includes(name) && !found.includes(name)) found.push(name); });
+  return found;
+}
+function wmSendToTimeline(id){
+  const cards=wmCollectCards();
+  const item=cards.find(c=>c.id===id);
+  if(!item) return;
+  const payload = {
+    arc:'arc1',
+    ep:item.ep||'',
+    epNote:'쓰기모드 카드에서 생성',
+    title:item.title||'새 사건',
+    chars:wmExtractChars((item.draft||'') + ' ' + (item.summary||'')),
+    summary:item.event || item.summary || '',
+    notes:item.draft || item.summary || '',
+    fragId:item.fragId || '',
+    source:'writing-mode'
+  };
+  let ev=null;
+  if(item.timelineId){
+    ev=(S.timelineEvents||[]).find(x=>x.id===item.timelineId);
+  }
+  if(ev){
+    Object.assign(ev, payload);
+  } else {
+    const newId='tl-'+(Date.now());
+    ev={id:newId, ...payload};
+    S.timelineEvents = S.timelineEvents || [];
+    S.timelineEvents.push(ev);
+    item.timelineId = newId;
+  }
+  renderWritingModeCards(cards);
+  updateWritingModeMeta();
+  renderTimelinePage();
+  updateBadges();
+  saveState();
+  const nav = document.querySelector('.nav-item[data-page="timeline"]');
+  if(nav) nav.click();
+  setTimeout(()=>selectTimelineEvent(ev.id),0);
+  toast('사건 타임라인의 오른쪽 편집칸으로 바로 열었어요');
+}
+
+
+function wmToggleCardCollapse(id){
+  const cards=wmEnsureCardIds(wmCollectCards());
+  const item=cards.find(c=>c.id===id);
+  if(!item) return;
+  item.collapsed = !item.collapsed;
+  renderWritingModeCards(cards);
+  updateWritingModeMeta();
+  saveState();
+}
+
 function wmLoadSelectedCard(){
   const id=S.writingMode?.selectedCardId;
   if(!id){ toast('선택된 카드가 없습니다'); return; }
   wmUseCard(id);
 }
 function preloadWritingModeCards(){
-  const initial = [
-    {ep:'1',title:'설렘의 방향',purpose:'세 인물 관계와 과거의 긴장을 여는 오프닝',emotion:'호기심 → 긴장',event:'시상식 재회와 첫 시선 교차',hook:'준리의 시선이 현재가 아닌 과거를 향한 듯 흔들린다',summary:'준리와 이유나가 시상식에서 재회하며 과거 관계가 암시된다. 윤정은 두 사람 사이의 긴장과 ‘설렘’이라는 단어에 흔들리고, 수상자로 무대에 올라 준리와 처음 정면으로 마주한다.'},
-    {ep:'2',title:'돌아갈 수밖에 없는 이유',purpose:'준리 복귀의 필연성과 과거의 잔상 제시',emotion:'회피 → 끌려옴',event:'위약금 문제로 한국 복귀 결정',hook:'박성재가 준리의 사진을 보며 오래된 감각을 떠올린다',summary:'준리는 위약금 문제로 10년 만의 한국 복귀를 결정한다. 이유나와의 감정이 정리되지 않았음이 드러나고, 박성재는 준리의 사진을 보며 희미한 기억을 추적한다.'},
-    {ep:'3',title:'도망치지 않는 사람',purpose:'윤정의 직진성과 오디션 축의 시작',emotion:'망설임 → 결심',event:'오디션 준비와 회유 거절',hook:'윤정은 포기하지 않고 오디션 현장으로 향한다',summary:'윤정은 최금자의 응원을 받으며 오디션을 준비한다. 박성재는 기존 이미지를 유지하라며 부드럽게 회유하지만, 윤정과 진성은 포기하지 않는다.'},
-    {ep:'4',title:'선을 넘은 사람',purpose:'준리와 윤정의 첫 충돌',emotion:'긴장 → 집착의 시작',event:'오디션장에서 즉흥 대사와 충돌',hook:'준리는 윤정을 밀어내려 하지만 결국 눈에 담게 된다',summary:'준 리는 윤정을 오디션에서 빼라 하지만 윤정은 끝까지 버틴다. 즉흥 대사로 아버지에 대한 실제 감정을 꺼내고, 복도에서 준 리의 냉랭한 반응에도 물러서지 않는다.'},
-    {ep:'5',title:'돌아온 것들',purpose:'캐스팅 확정과 과거 이름의 첫 흔적',emotion:'불안 → 기회',event:'윤정 여주 확정',hook:'댓글에서 ‘권지호’라는 이름의 흔적이 발견된다',summary:'프로덕션 회의 중 준 리는 윤정을 안 된다고 하다가, 이유나가 나타나는 순간 윤정을 여주로 낙점한다. 윤정은 확정 기사 댓글에서 ‘권지호’라는 이름을 처음 발견한다.'},
-    {ep:'6',title:'거장의 그림자, 그리고 이상한 규칙들',purpose:'준리의 현장 규칙과 분위기 세팅',emotion:'낯섦 → 흥미',event:'준리 사용설명서 전달',hook:'리안의 실수 한마디가 과거의 혈연/기원을 암시한다',summary:'캐스팅 후 리안은 특정 생수, 수저 받침, 외모 언급 금지 등 준리의 기묘한 규칙들을 전수한다. 실수로 “그 아빠에 그 딸”이라는 말을 흘린다.'},
-    {ep:'7',title:'날카로운 선 위에서',purpose:'준리의 냉정한 디렉팅과 첫 인정',emotion:'압박 → 미세한 인정',event:'전체 리딩과 피드백',hook:'“호흡, 나쁘지 않았습니다”라는 한마디가 윤정에게 남는다',summary:'전체 리딩 날 윤정은 준 리의 얼굴을 가까이 보고 강하게 흔들린다. 리딩 내내 날카로운 피드백에 시달리지만, 마지막에 짧은 인정을 받는다.'},
-    {ep:'8',title:'닮은꼴의 밤',purpose:'준리 시선 속 윤정의 잠재력 부각',emotion:'관찰 → 닮음의 인식',event:'강원도 크랭크인과 밤샘 연습',hook:'준리는 윤정에게서 과거의 자신을 본다',summary:'강원도 해안가에서 크랭크인 촬영이 진행된다. 윤정이 밤새 연습하는 모습을 본 준리는 과거의 자신을 떠올리며 ‘닮았네’라고 중얼거린다.'},
-    {ep:'9',title:'가장 오래된 이름',purpose:'권지호 이름을 서사 전면에 올림',emotion:'호기심 → 균열',event:'유나의 호명',hook:'윤정이 ‘지호’라는 이름을 직접 듣는다',summary:'이유나가 현장에서 준 리를 ‘지호야’라고 부른다. 그날 밤 윤정은 전화 통화 중 ‘지호’라는 두 글자를 듣고, 유나 또한 차 안에서 그 이름을 되뇐다.'},
-    {ep:'10',title:'차가운 변화와 혼란의 시작',purpose:'유나 등장 이후 긴장 고조',emotion:'혼란 → 경계',event:'준리의 태도 급변',hook:'윤정은 자신이 이미 그 이야기의 문 앞에 와 있음을 깨닫는다',summary:'유나 방문 이후 준 리는 더욱 서늘해진다. 윤정은 리안에게 권지호에 대해 묻지만 선을 긋는 답만 듣고, 자신이 그 이야기의 문턱에 와 있음을 자각한다.'},
-    {ep:'11',title:'폭풍 뒤의 수습과 은밀한 가십',purpose:'현장 소문과 리안의 시선 제시',emotion:'관심 → 예감',event:'스태프 가십과 리안의 암시',hook:'리안은 준리와 윤정이 더 오래 엮일 것이라 말한다',summary:'현장 스태프 사이에 유나 관련 소문이 퍼진다. 리안은 윤정에게 준리가 여린 사람이라 말하면서도 권지호 이야기는 아직 알 때가 아니라고 선을 긋는다.'},
-    {ep:'12',title:'금기된 얼굴',purpose:'금지된 친밀감의 첫 착화',emotion:'당황 → 설렘',event:'준리 밴에 잘못 탑승',hook:'윤정은 “진짜 큰일 났다”고 혼잣말한다',summary:'폭우를 피해 밴에 잘못 탄 윤정은 준리의 맨얼굴을 정면에서 본다. 차갑게 생겼지만 이상하게 귀여웠다는 인상에 크게 흔들린다.'},
-    {ep:'13',title:'술잔에 담긴 급발진 고백',purpose:'감정이 말로 튀어나오는 첫 공개 사고',emotion:'취기 → 노출',event:'회식 자리 외모 발언',hook:'준리는 자리를 먼저 뜨고 리안은 절규한다',summary:'회식 자리에서 취한 윤정이 준리의 얼굴이 귀여웠다고 공개 발언한다. 준리는 먼저 자리를 뜨고, 리안은 외모 언급 금지 규칙을 떠올리며 경악한다.'},
-    {ep:'14',title:'이름이 불린 순간',purpose:'호칭 변화로 감정의 미세한 진전 제시',emotion:'무심 → 오래 남는 떨림',event:'‘지윤정 배우’가 아닌 ‘윤정 씨’',hook:'준리 역시 윤정의 시선을 의식하기 시작한다',summary:'준리가 무전에서 ‘윤정 씨’라고 부른 사실이 퍼진다. 윤정은 그 두 글자가 오래 남고, 준리 또한 윤정의 시선을 의식한다.'},
-    {ep:'15',title:'조명 파편 아래',purpose:'신체 접촉과 감정 자각',emotion:'긴장 → 인정',event:'조명 폭발 사고와 포옹',hook:'윤정은 처음으로 자신이 저 사람을 좋아한다고 인정한다',summary:'세트장에서 조명 폭발 사고가 나고 윤정은 본능적으로 준리에게 매달린다. 그 짧은 포옹 이후 윤정은 처음으로 자신의 감정을 인정한다.'},
-    {ep:'16',title:'무너지는 층계, 열한 번의 낙인',purpose:'준리의 가혹함과 윤정의 붕괴 직전',emotion:'버팀 → 상처',event:'진공 씬 반복 실패',hook:'윤정은 텅 빈 세트에 홀로 남겨진다',summary:'기록보관실 세트에서 열한 번의 테이크 끝에 준 리는 윤정을 몰아붙인다. 윤정은 눈물을 떨구며 텅 빈 세트에 홀로 남는다.'},
-    {ep:'17',title:'텅 빈 방의 메아리, 진공의 고백',purpose:'윤정의 내면 상처 폭발',emotion:'억눌림 → 폭발',event:'가정사와 진공의 의미 고백',hook:'준리는 진공이라는 단어 앞에 압도된다',summary:'대기실에서 윤정은 자신의 가정사와 ‘진공’의 의미를 쏟아낸다. 준리는 굳은 채 윤정을 돌려보내고 압도된다.'},
-    {ep:'18',title:'뚜껑이 열린 함묵',purpose:'준리식 사과와 행동형 감정 표현',emotion:'상처 → 조용한 회복',event:'물병 뚜껑을 미리 풀어둠',hook:'윤정은 아직 그 배려의 주체를 모른다',summary:'밤에 세트로 돌아온 준리는 생수병 뚜껑을 미리 풀어둔다. 다음 날 윤정은 그 감각으로 연기에 성공하고, 준리는 단번에 오케이를 낸다.'},
-    {ep:'19',title:'서툰 궤도 수정',purpose:'준리의 사과 준비와 우회적 접근',emotion:'어색함 → 수정 의지',event:'사과 방법 탐색',hook:'준리는 윤정의 본가를 향해 움직인다',summary:'둘은 서로 눈치를 본다. 이틀 휴가 동안 준리는 윤정이 좋아하는 것을 묻고, 집밥이라는 정보를 얻어 조용히 움직인다.'},
-    {ep:'20',title:'최금자의 밥상, 낯선 온기의 식탁',purpose:'준리의 인간적 얼굴 노출',emotion:'어색함 → 낯선 온기',event:'윤정 본가 방문',hook:'윤정은 완전히 다른 준리의 얼굴에 경악한다',summary:'준리가 윤정의 본가를 찾아 최금자에게 밥을 대접받는다. 깜짝 귀향한 윤정은 현장과 전혀 다른 준리의 얼굴을 보게 된다.'},
-    {ep:'21',title:'소매를 걷어붙이다',purpose:'말 없는 사과의 체화',emotion:'경계 → 사죄의 감지',event:'식당 일 돕기와 귀경',hook:'사과는 말이 아니라 행동으로 남는다',summary:'준리는 식당 일을 돕고, 밤에 윤정과 함께 서울로 돌아온다. 윤정은 말 없는 뒷모습에서 사과의 무게를 느낀다.'},
-    {ep:'22',title:'오래된 극장의 불빛',purpose:'리셉션에서 과거·현재 관계 재배치',emotion:'조심 → 불완전한 수용',event:'리셉션과 사과',hook:'윤정은 준리의 사과를 받아들이지만 긴장은 남는다',summary:'오션시네마 리셉션에서 준리와 유나는 과거를 잠깐 건드린다. 준리는 윤정에게 불완전한 사과를 건네고, 윤정은 그것을 받아들인다.'},
-    {ep:'23',title:'흘러가는 밤',purpose:'각자의 불면과 압박의 확장',emotion:'불안 → 잠들지 못함',event:'박성재의 탐색과 준리의 밤',hook:'세 인물 모두 같은 밤을 쉽게 넘기지 못한다',summary:'박성재는 귀가길의 윤정을 탐색하고, 준리는 어머니와 영상통화를 하며 시간을 보낸다. 모두가 쉽게 잠들지 못하는 밤이다.'},
-    {ep:'24',title:'무장이 풀린 자리',purpose:'준리의 방어가 풀리는 순간 제시',emotion:'조심 → 흔들림',event:'준리의 잠듦과 윤정의 무릎',hook:'준리는 혼자 복도에서 그 감촉을 지우지 못한다',summary:'준리가 대기실에서 윤정 옆에서 잠들고, 윤정은 조심스럽게 무릎을 내준다. 깨어난 준리는 당황하며 도망치듯 자리를 뜬다.'},
-    {ep:'25',title:'맛있어서요',purpose:'감정 은폐와 행동형 배려 반복',emotion:'실망 → 다시 기쁨',event:'케이터링 변경',hook:'리안의 찬물에도 윤정의 입가는 내려오지 않는다',summary:'준리는 현장 케이터링을 최금자 식당으로 바꾼다. 이유를 묻는 윤정에게 맛있어서라고만 답하지만, 윤정은 다시 기뻐한다.'},
-    {ep:'26',title:'충무로의 밤',purpose:'유나-준리 과거 감정 재가동',emotion:'피로 → 솔직함',event:'우연한 충무로 대면',hook:'준리와 유나는 처음으로 과거를 솔직히 건드린다',summary:'투자사 충돌 후 준리는 충무로 골목을 걷다 유나와 마주친다. 오래된 카페에서 둘은 과거에 대해 처음 솔직하게 이야기한다.'},
-    {ep:'27',title:'골목 끝의 눈물',purpose:'윤정의 사랑이 아픔으로 자각되는 전환점',emotion:'희망 → 상실감',event:'카페 속 준리와 유나 목격',hook:'윤정은 좋아하는 감정이 이렇게 아픈 것임을 처음 배운다',summary:'윤정은 카페 통창 너머 유나 앞에서만 힘을 푼 준리를 본다. 골목 구석에서 혼자 눈물을 흘리며 사랑의 고통을 처음 배운다.'},
-    {ep:'28',title:'진공의 전초전',purpose:'윤정의 자각 고백과 거리두기 시작',emotion:'질투 → 고백의 자각',event:'리안에게 감정 고백',hook:'감정은 선명해졌지만 관계는 더 어려워진다',summary:'충무로 이후 윤정은 준리를 의식적으로 피한다. 리안에게 조심스럽게 준리를 좋아한다고 털어놓고, 연기는 오히려 더 선명해진다.'},
-    {ep:'29',title:'티 나는 사람',purpose:'질투의 표면화',emotion:'감춤 → 티 나는 신경전',event:'이유나 전화와 커피차',hook:'작아지는 윤정의 마음이 더 선명해진다',summary:'촬영 중 이유나 전화에 윤정은 묘한 신경전을 보이고, 준리는 전화를 끈다. 이후 이유나의 커피차가 도착하자 윤정은 더 작아진다.'},
-    {ep:'30',title:'소품실의 온도',purpose:'관계의 명시적 전환',emotion:'머뭇거림 → 직접 고백',event:'윤정의 고백',hook:'준리는 아무 말도 못한 채 종이도 줍지 못하고 선다',summary:'소품실에서 윤정은 준리에게 배우가 아닌 사람으로서 좋아한다고 고백한다. 준리는 굳은 채 아무 말도 하지 못한다.'},
-    {ep:'31',title:'선을 긋는 사람',purpose:'준리의 의도적 거리두기',emotion:'고백 이후 → 철저한 선 긋기',event:'시스템 에러 발언',hook:'리안이 큰일났다고 들이닥친다',summary:'고백 다음 날 준리는 ‘지윤정 배우님’이라 부르며 딱딱하게 선을 긋는다. 밴 안에서 어제 일은 시스템 에러로 생각하자고 못 박는다.'},
-    {ep:'32',title:'지옥의 체크인',purpose:'물리적 거리두기를 역으로 뒤엎는 상황 설치',emotion:'혼란 → 강제 근접의 예고',event:'숙소 예약 증발',hook:'준리는 아직 자신이 윤정의 본가로 향하게 될 줄 모른다',summary:'숙소 예약이 모두 증발해 준리 일행은 허름한 민박과 모텔을 전전한다. 결국 윤정의 제안으로 본가에 머물게 된다.'},
-    {ep:'33',title:'벽 하나 거리',purpose:'강제 동거가 만드는 긴장 배치',emotion:'불편함 → 잠 못 드는 의식',event:'준리의 본가 입성',hook:'벽 하나 사이에서 둘은 서로를 의식한 채 잠들지 못한다',summary:'준리가 속아서 윤정의 본가로 들어온다. 리안은 인간적인 예의를 지키라 다그치고, 윤정은 벽 하나 사이에 준리가 있다는 사실을 낯설어한다.'},
-    {ep:'34',title:'미세한 균열',purpose:'준리 방어의 작은 흔들림 제시',emotion:'외면 → 멈칫',event:'도시락과 야식 제안',hook:'준리의 젓가락이 멈추는 순간이 남는다',summary:'아침 식탁과 현장 도시락을 거치며 준리는 윤정의 손길을 의식한다. 윤정의 야식 제안은 외면하지만 흔들림이 남는다.'},
-    {ep:'35',title:'온도의 잔상',purpose:'윤정의 배려 흔적 발견',emotion:'버팀 → 돌봄의 잔상',event:'담요와 쓰러짐',hook:'윤정이 가장 먼저 뛰어오는 장면이 찍힌다',summary:'준리는 폐공장에서 홀로 잠들었다가 담요 안감에서 윤정과 관련된 패턴을 발견한다. 이후 촬영장에서 쓰러지자 윤정이 가장 먼저 뛰어온다.'},
-    {ep:'36',title:'밤의 항로',purpose:'간병과 보호를 통해 감정 밀도 상승',emotion:'불안 → 안도',event:'윤정의 간병과 강제 휴가',hook:'준리는 야광별 천장을 보며 잠든다',summary:'윤정은 밤에 몰래 와 준리를 돌본다. 준리는 의원에서 눈을 뜨면 윤정이 손등을 잡고 있고, 이후 본가에서 다시 쉬게 된다.'},
-    {ep:'37',title:'문장을 고르는 시간',purpose:'일상 속 사소한 친밀감 축적',emotion:'조심 → 소소한 설렘',event:'텃밭, 모자, 물병 뚜껑',hook:'윤정은 저 사람은 정말…이라고 혼자 생각한다',summary:'텃밭 소동 속에서 윤정은 준리에게 농부 모자를 씌워주고, 준리는 미리 딴 물병을 건넨다. 사소한 손길이 이상하게 가슴을 친다.'},
-    {ep:'38',title:'마음은요',purpose:'관계의 조건부 합의',emotion:'회피 → 인정',event:'준리의 사과와 고백 아닌 고백',hook:'마음은 막지 않되 일에 지장이 없기를 합의한다',summary:'유나의 전화를 받은 밤, 준리는 먼저 자신이 유치하게 회피했다고 사과한다. 좋아할 수 없지만 마음은 막지 않겠다며 관계의 새로운 합의를 만든다.'},
-    {ep:'39',title:'완화의 흔적',purpose:'유나만이 아는 준리의 얼굴을 윤정에게 각인',emotion:'평정 → 미세한 상실',event:'유나의 본가 방문',hook:'윤정은 오직 유나만이 만든 완화된 표정을 목격한다',summary:'이유나가 예고 없이 본가를 방문한다. 이후 준리와 유나가 뒷길을 걷고 돌아온 뒤, 윤정은 준리의 완화된 표정을 본다.'},
-    {ep:'40',title:'들키지 않는 사람',purpose:'일상의 복귀 속 잠복한 위기 설치',emotion:'버팀 → 잠복한 불안',event:'촬영 재개와 박성재의 결심',hook:'박성재가 권지호라는 이름을 내려다보며 움직이기 시작한다',summary:'촬영이 재개되고 준리는 여전히 물병 뚜껑을 미리 풀어두지만 아무 말하지 않는다. 마지막에 박성재가 권지호라는 이름이 적힌 서류를 보며 움직일 결심을 한다.'}
-  ];
-  renderWritingModeCards(initial);
+  renderWritingModeCards([]);
   wmRenderAnalysis({purpose:'—',emotion:'—',event:'—',hook:'—'});
   updateWritingModeMeta();
 }
@@ -2518,14 +4355,22 @@ function canvasAddArea(){
   const area = {id:canvasUid('area'), x:60, y:60, w:360, h:220, title:'구간/묶음'};
   const s = collectCanvasState(); s.areas.push(area); renderCanvasFromState(s); saveState();
 }
+function canvasDeleteArea(id){
+  const s = collectCanvasState();
+  s.areas = (s.areas||[]).filter(a=>a.id!==id);
+  renderCanvasFromState(s);
+  saveState();
+}
 function canvasCreateAreaEl(area){
   const stage = document.getElementById('canvas-stage');
   const el = document.createElement('div');
   el.className = 'canvas-area'; el.dataset.id = area.id;
   el.style.left = area.x+'px'; el.style.top = area.y+'px'; el.style.width=(area.w||360)+'px'; el.style.height=(area.h||220)+'px';
-  el.innerHTML = `<input class="canvas-area-title" value="${esc(area.title||'구간/묶음')}" placeholder="예: 2막 전반 / 2차 압박">`;
+  el.innerHTML = `<div class="canvas-area-head"><input class="canvas-area-title" value="${esc(area.title||'구간/묶음')}" placeholder="예: 도입부 / 전환점"><button type="button" class="canvas-area-del" title="영역 삭제">삭제</button></div>`;
   makeDraggable(el, {onMove:canvasRenderLinks, onEnd:()=>{saveState();}});
   el.querySelector('.canvas-area-title').addEventListener('input', saveState);
+  const delBtn = el.querySelector('.canvas-area-del');
+  delBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); canvasDeleteArea(area.id); });
   stage.appendChild(el);
 }
 function canvasAddNote(seed={}){
@@ -2629,8 +4474,12 @@ function makeDraggable(el, opts={}){
    INIT
 ══════════════════════════════════ */
 buildAnalysisGrid();
+populatePromptPresetSelect();
 buildBeatCanvas();
 loadState();
+if(!v('analysis-prompt-text')) sv('analysis-prompt-text', ANALYSIS_PROMPT_PRESETS[S.analysisPromptPreset||'gl_commercial']||ANALYSIS_PROMPT_PRESETS.gl_commercial);
+if(!document.getElementById('analysis-prompt-preset').value) document.getElementById('analysis-prompt-preset').value=S.analysisPromptPreset||'gl_commercial';
+updateAnalysisScopePreview();
 if(!document.querySelectorAll('.char-card').length)addChar();
 if(!document.querySelectorAll('.wm-episode-card').length) preloadWritingModeCards();
 updateBadges();
@@ -2913,7 +4762,13 @@ renderCanvasFromState(S.incidentCanvas||{notes:[],links:[],areas:[]});
 
   function applyHashPreviews(){
     document.querySelectorAll('.frag-memo-ta, .manu-write-ta, .canvas-note-ta, #wm-editor, .f-input').forEach(el=>{
-      if(el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') ensurePreviewWrap(el);
+      if(!(el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')) return;
+      if(el.closest('#page-characters')){
+        const existing = el.parentElement && el.parentElement.querySelector('.hash-preview-wrap');
+        if(existing) existing.remove();
+        return;
+      }
+      ensurePreviewWrap(el);
     });
   }
 
@@ -3286,7 +5141,7 @@ function importProjectJSON(event){
   reader.onload = function(ev){
     try{
       const data = JSON.parse(ev.target.result);
-      localStorage.setItem('spack_v4', JSON.stringify(data));
+      localStorage.setItem('spack_v6_clean', JSON.stringify(data));
       const note = document.getElementById('json-last-action');
       if(note) note.textContent = '마지막 작업: JSON 불러오기 완료 (새로고침 중)';
       if(typeof showToast === 'function') showToast('프로젝트 JSON을 불러왔어요. 새로고침합니다.');
@@ -3299,6 +5154,164 @@ function importProjectJSON(event){
   reader.readAsText(file, 'utf-8');
   event.target.value = '';
 }
+
+
+/* === v8.2 manuscript preview refs === */
+let _refPickerCtx = null;
+
+function getManuPreviewSource(card){
+  let refs=[]; try{ refs=JSON.parse(card.dataset.previewRefs||'[]'); }catch(e){}
+  const current = card.dataset.currentPreview || 'base';
+  const allRefs = [...MANU_FIXED_TEMPLATES, ...refs];
+  if(current === 'base'){
+    return { id:'base', type:'base', label:'원본', content: card.dataset.basePreview || '' };
+  }
+  return allRefs.find(r=>r.id===current) || { id:'base', type:'base', label:'원본', content: card.dataset.basePreview || '' };
+}
+
+function updateManuPreview(card){
+  const source = getManuPreviewSource(card);
+  const preview = card.querySelector('.manu-preview');
+  preview.dataset.content = source.content || '';
+  preview.innerHTML = renderPreviewHtml(source.content || '');
+  renderManuPreviewTabs(card);
+}
+
+function renderManuPreviewTabs(card){
+  const wrap = card.querySelector('.manu-ref-tabs');
+  if(!wrap) return;
+  let refs=[]; try{ refs=JSON.parse(card.dataset.previewRefs||'[]'); }catch(e){}
+  const current = card.dataset.currentPreview || 'base';
+  const baseChip = `
+    <div class="manu-ref-chip ref-type-base ${current==='base'?'active':''}" onclick="setManuPreviewSource(this.closest('.manu-card'),'base')">
+      원본
+    </div>`;
+  const fixedChips = MANU_FIXED_TEMPLATES.map(ref=>`
+    <div class="manu-ref-chip ref-type-template ${current===ref.id?'active':''}" onclick="setManuPreviewSource(this.closest('.manu-card'),'${ref.id}')">
+      ${esc(ref.label||'양식')}
+    </div>
+  `).join('');
+  const dynamicChips = refs.map(ref=>{
+    const cls = ref.type==='fragment' ? 'ref-type-frag' : (ref.type==='wm' ? 'ref-type-wm' : 'ref-type-manu');
+    return `<div class="manu-ref-chip ${cls} ${current===ref.id?'active':''}" onclick="setManuPreviewSource(this.closest('.manu-card'),'${ref.id}')">
+      ${esc(ref.label||'참고')}
+      <span class="x" onclick="event.stopPropagation();removeManuPreviewRef(this.closest('.manu-card'),'${ref.id}')">×</span>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = baseChip + fixedChips + dynamicChips;
+}
+
+function setManuPreviewSource(card, refId){
+  card.dataset.currentPreview = refId;
+  updateManuPreview(card);
+  saveState();
+}
+
+function removeManuPreviewRef(card, refId){
+  let refs=[]; try{ refs=JSON.parse(card.dataset.previewRefs||'[]'); }catch(e){}
+  refs = refs.filter(r=>r.id!==refId);
+  card.dataset.previewRefs = JSON.stringify(refs);
+  if(card.dataset.currentPreview===refId) card.dataset.currentPreview = 'base';
+  updateManuPreview(card);
+  saveState();
+}
+
+function getRefItemsByType(type, currentCard){
+  if(type==='fragment'){
+    return [...document.querySelectorAll('.frag-card')].map((fc,idx)=>{
+      const title = fc.querySelector('[data-k="title"]')?.value || ('조각 '+(idx+1));
+      const ep = fc.querySelector('[data-k="ep"]')?.value || '';
+      const purpose = fc.querySelector('[data-k="purpose"]')?.value || '';
+      const memo = fc.querySelector('.frag-memo-ta')?.value || '';
+      return {
+        id: 'frag:' + (fc.dataset.fragId || fc.id || idx),
+        label: ep ? `${ep}화 · ${title}` : title,
+        preview: purpose || memo || '',
+        content: [title, purpose, memo].filter(Boolean).join('\\n\\n'),
+        type:'fragment'
+      };
+    });
+  }
+  if(type==='wm'){
+    return wmCollectCards().map((c,idx)=>({
+      id:'wm:'+ (c.id || idx),
+      label: c.ep ? `${c.ep}화 · ${c.title||'무제'}` : (c.title||('카드 '+(idx+1))),
+      preview: c.summary || c.event || '',
+      content: [c.title, c.purpose&&('목적: '+c.purpose), c.emotion&&('감정: '+c.emotion), c.event&&('사건: '+c.event), c.hook&&('훅: '+c.hook), c.draft||c.summary].filter(Boolean).join('\\n\\n'),
+      type:'wm'
+    }));
+  }
+  if(type==='manu'){
+    return [...document.querySelectorAll('.manu-card')].filter(mc=>mc!==currentCard).map((mc,idx)=>({
+      id:'manu:'+ (mc.querySelector('[data-k="ep"]')?.value || idx),
+      label: (mc.querySelector('[data-k="ep"]')?.value ? (mc.querySelector('[data-k="ep"]')?.value+'화 · ') : '') + (mc.querySelector('[data-k="title"]')?.value || ('원고 '+(idx+1))),
+      preview: (mc.querySelector('.manu-write-ta')?.value || mc.dataset.basePreview || '').slice(0,120),
+      content: (mc.querySelector('.manu-write-ta')?.value || mc.dataset.basePreview || ''),
+      type:'manu'
+    }));
+  }
+  return [];
+}
+
+function openRefPicker(btn, type){
+  const card = btn.closest('.manu-card');
+  _refPickerCtx = { card, type };
+  const modal = document.getElementById('ref-picker-modal');
+  const list = document.getElementById('ref-picker-list');
+  const search = document.getElementById('ref-picker-search');
+  const label = document.getElementById('ref-picker-type-label');
+  label.textContent = type==='fragment' ? '에피소드 조각 선택' : (type==='wm' ? '쓰기 카드 선택' : '이전 원고 본문 선택');
+  modal.style.display='flex';
+  search.value='';
+  renderRefPickerList();
+  search.oninput = renderRefPickerList;
+}
+
+function renderRefPickerList(){
+  if(!_refPickerCtx) return;
+  const { card, type } = _refPickerCtx;
+  const q = (document.getElementById('ref-picker-search').value || '').trim().toLowerCase();
+  const list = document.getElementById('ref-picker-list');
+  const items = getRefItemsByType(type, card).filter(it => !q || (it.label+' '+it.preview+' '+it.content).toLowerCase().includes(q));
+  if(!items.length){
+    list.innerHTML = '<div class="wm-empty">불러올 수 있는 자료가 없어요.</div>';
+    return;
+  }
+  list.innerHTML = items.map(it=>`
+    <div class="ref-picker-item" onclick="chooseRefItem('${it.id.replace(/'/g,'\\\'')}')">
+      <div class="ref-picker-title">${esc(it.label)}</div>
+      <div class="ref-picker-sub">${esc((it.preview||'').slice(0,180))}</div>
+    </div>
+  `).join('');
+  window.__refPickerItems = items;
+}
+
+function chooseRefItem(id){
+  if(!_refPickerCtx) return;
+  const { card } = _refPickerCtx;
+  const items = window.__refPickerItems || [];
+  const picked = items.find(it=>it.id===id);
+  if(!picked) return;
+  let refs=[]; try{ refs=JSON.parse(card.dataset.previewRefs||'[]'); }catch(e){}
+  const exists = refs.find(r=>r.id===picked.id);
+  if(!exists) refs.push(picked);
+  card.dataset.previewRefs = JSON.stringify(refs);
+  card.dataset.currentPreview = picked.id;
+  updateManuPreview(card);
+  closeRefPicker();
+  saveState();
+  toast('프리뷰 참고자료를 추가했어요');
+}
+
+function closeRefPicker(){
+  document.getElementById('ref-picker-modal').style.display='none';
+  _refPickerCtx = null;
+}
+
+document.addEventListener('click', function(e){
+  const modal = document.getElementById('ref-picker-modal');
+  if(modal && e.target===modal) closeRefPicker();
+});
 
 </script>
 
@@ -3319,6 +5332,21 @@ function importProjectJSON(event){
 <div id="hash-jump-menu" class="hash-jump-menu">
   <div class="hash-jump-menu-head" id="hash-jump-menu-head">#태그 이동</div>
   <div class="hash-jump-menu-body" id="hash-jump-menu-body"></div>
+</div>
+
+
+<div id="ref-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:6500;align-items:center;justify-content:center;">
+  <div style="width:640px;max-width:calc(100vw - 32px);max-height:80vh;background:var(--bg);border:1.5px solid var(--ink);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px;background:var(--bg2);">
+      <div style="font-family:var(--font-s);font-size:18px;font-weight:700;flex:1;">원고 프리뷰에 참고자료 추가</div>
+      <div style="cursor:pointer;font-size:20px;color:var(--ink4);" onclick="closeRefPicker()">×</div>
+    </div>
+    <div style="padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input id="ref-picker-search" class="frag-search" placeholder="제목/내용 검색">
+      <span id="ref-picker-type-label" class="wm-subnote">자료 선택</span>
+    </div>
+    <div id="ref-picker-list" style="padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
 </div>
 
 </body>
