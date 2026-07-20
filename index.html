@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Story Patcher · Mobile v0.3.1</title>
+<title>Story Patcher · Mobile v0.3.3</title>
 <style>
 :root{
   --bg:#faf8f5; --paper:#fffdfb; --ink:#2b2620; --sub:#7d7568; --line:#e7e1d6;
@@ -159,27 +159,29 @@ body{
 .lib-scrim{position:absolute;inset:0;background:rgba(20,17,12,.34);z-index:59;opacity:0;pointer-events:none;transition:opacity .2s}
 .lib-scrim.show{opacity:1;pointer-events:auto}
 .lib{
-  position:absolute;top:0;bottom:0;left:0;width:88%;max-width:360px;background:var(--paper);
+  position:absolute;top:0;bottom:0;left:0;width:min(86vw,340px);max-width:calc(100vw - 28px);
+  height:100vh;height:100dvh;background:var(--paper);overflow:hidden;
   z-index:60;transform:translateX(-100%);transition:transform .22s ease;display:flex;flex-direction:column;
   box-shadow:6px 0 20px rgba(0,0,0,.15)
 }
 .lib.show{transform:translateX(0)}
 .lib-head{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + var(--safe-t)) 12px 12px 16px;border-bottom:1px solid var(--line)}
 .lib-head strong{font-size:16px}
-.lib-body{flex:1;overflow-y:auto;padding:10px 8px}
+.lib-body{flex:1;min-height:0;overflow-y:auto;padding:8px 6px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .work-group{margin-bottom:6px}
-.work-row{display:flex;align-items:center;gap:4px;padding:5px 4px;border-radius:10px;background:#f5f1ea;color:var(--ink)}
+.work-row{display:flex;align-items:center;gap:2px;min-height:44px;padding:2px;border-radius:10px;background:#f5f1ea;color:var(--ink)}
 .work-row.active{background:#eee5d9}
-.work-toggle,.lib-item-menu{width:34px;height:34px;border:none;background:transparent;border-radius:9px;color:var(--sub);font-size:15px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;cursor:pointer}
+.work-toggle,.lib-item-menu{width:40px;height:40px;border:none;background:transparent;border-radius:9px;color:var(--sub);font-size:15px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;cursor:pointer;touch-action:manipulation}
 .work-toggle:active,.lib-item-menu:active{background:var(--line)}
-.work-name{flex:1;min-width:0;border:none;background:transparent;text-align:left;padding:7px 4px;font-weight:750;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
-.episode-list{padding:4px 0 2px 18px}
-.doc-row{display:flex;align-items:center;gap:6px;padding:5px 4px 5px 8px;font-size:13.5px;border-radius:9px;color:#4a453b}
+.work-name{flex:1;min-width:0;min-height:40px;border:none;background:transparent;text-align:left;padding:0 4px;font-weight:750;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;touch-action:manipulation}
+.episode-list{padding:2px 0 4px 12px}
+.doc-row{display:flex;align-items:center;gap:3px;min-height:40px;padding:1px 2px 1px 6px;font-size:13.25px;border-radius:9px;color:#4a453b}
 .doc-row.active{background:#f1e9dd;color:var(--accent);font-weight:700}
 .doc-row.reference:not(.active){background:#edf2f5}
-.doc-name{flex:1;min-width:0;border:none;background:transparent;text-align:left;padding:7px 2px;color:inherit;font:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.doc-name{flex:1;min-width:0;min-height:38px;border:none;background:transparent;text-align:left;padding:0 4px;color:inherit;font:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;touch-action:manipulation}
 .doc-badge{font-size:9px;color:#566c7a;border:1px solid #bfcdd6;background:#fff;border-radius:999px;padding:2px 5px;white-space:nowrap}
-.lib-add{display:block;width:100%;border:none;background:transparent;text-align:left;padding:9px 10px 9px 22px;font-size:13px;color:var(--accent);font-weight:700;border-radius:8px;cursor:pointer}
+.work-count{flex:0 0 auto;color:var(--sub);font-size:10.5px;background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:999px;padding:2px 6px;white-space:nowrap}
+.lib-add{display:block;width:100%;border:none;background:transparent;text-align:left;padding:8px 8px 8px 18px;font-size:13px;color:var(--accent);font-weight:700;border-radius:8px;cursor:pointer}
 .lib-add:active{background:var(--line)}
 .lib-empty{padding:8px 12px 12px 22px;color:var(--sub);font-size:12px}
 .lib-foot{padding:10px 12px calc(10px + var(--safe-b));border-top:1px solid var(--line)}
@@ -221,8 +223,10 @@ body{
   border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.15);z-index:55;overflow-y:auto;max-height:72vh;min-width:210px;
   opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .15s ease}
 .menu-sheet.show{opacity:1;pointer-events:auto;transform:translateY(0)}
-.menu-sheet button{display:block;width:100%;text-align:left;border:none;background:transparent;padding:12px 16px;font-size:13.5px;color:var(--ink);cursor:pointer}
-.menu-sheet button:active{background:var(--line)}
+.menu-sheet button,.menu-file-label{display:block;width:100%;text-align:left;border:none;background:transparent;padding:12px 16px;font-size:13.5px;color:var(--ink);cursor:pointer;text-decoration:none}
+.menu-sheet button:active,.menu-file-label:active{background:var(--line)}
+.menu-file-label:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.visually-hidden-file{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;opacity:.001!important;pointer-events:none!important}
 
 /* ---------- dialogs (rename/export/etc) ---------- */
 .modal-scrim{position:fixed;inset:0;background:rgba(20,17,12,.5);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
@@ -374,15 +378,15 @@ body{
     <div class="menu-sheet" id="menuSheet">
       <button data-m="exportAi">AI 지시서 내보내기</button>
       <button data-m="exportTxt">TXT 최종 원고 내보내기</button>
-      <button data-m="importTxt">TXT 원문 불러오기</button>
+      <label class="menu-file-label" id="txtImportLabel" for="txtImportInput" role="button" tabindex="0">TXT 원문 불러오기</label>
       <button data-m="exportJson">프로젝트 JSON 백업</button>
-      <button data-m="importJson">프로젝트 JSON 불러오기</button>
+      <label class="menu-file-label" id="jsonImportLabel" for="jsonImportInput" role="button" tabindex="0">프로젝트 JSON 불러오기</label>
       <button data-m="duplicateDoc">회차 복사본 만들기</button>
       <button data-m="renameDoc">회차 이름 바꾸기</button>
       <button data-m="deleteDoc">회차 삭제</button>
     </div>
-    <input id="txtImportInput" type="file" accept=".txt,.md,text/plain,text/markdown,*/*" multiple hidden>
-    <input id="jsonImportInput" type="file" accept=".json,application/json,text/json,text/plain,*/*" hidden>
+    <input id="txtImportInput" type="file" accept=".txt,.md,text/plain,text/markdown,*/*" multiple class="visually-hidden-file">
+    <input id="jsonImportInput" type="file" accept=".json,application/json,text/json,text/plain,*/*" class="visually-hidden-file">
   </div>
 
   <!-- ============ document library item actions ============ -->
@@ -422,10 +426,10 @@ const previewScreen=$('#previewScreen'), previewBody=$('#previewBody'), previewB
 const charCount=$('#charCount'), saveStatus=$('#saveStatus');
 const menuBtn=$('#menuBtn'), menuSheet=$('#menuSheet');
 const modalScrim=$('#modalScrim'), modalBox=$('#modalBox');
-const txtImportInput=$('#txtImportInput'), jsonImportInput=$('#jsonImportInput');
+const txtImportInput=$('#txtImportInput'), jsonImportInput=$('#jsonImportInput'), txtImportLabel=$('#txtImportLabel'), jsonImportLabel=$('#jsonImportLabel');
 const isTablet=()=>window.innerWidth>=840;
 
-const VERSION='0.3.1';
+const VERSION='0.3.3';
 const STORAGE_KEY='story_patcher_mobile_v03';
 const LEGACY_KEYS=['story_patcher_mobile_v02','story_patcher_mobile_v01'];
 const ANN_SELECTOR='.modified,.added,.suggestion,.deleted,.memo';
@@ -436,18 +440,65 @@ const BLOCK_TAGS=new Set(['P','DIV','LI','BLOCKQUOTE','H1','H2','H3','H4','H5','
 let project=loadProject();
 function emptyProject(){return {version:VERSION,works:[],activeWorkId:null,activeDocId:null,referenceWorkId:null,referenceDocId:null}}
 function seedProject(){
-  // GitHub Pages 공개 배포용: 샘플 원고 없이 빈 프로젝트로 시작합니다.
-  return emptyProject();
+  const workId=uid('w'),docId=uid('d');
+  return {version:VERSION,works:[{id:workId,title:'설렘의 방향',_open:true,lastActiveDocId:docId,docs:[{
+    id:docId,title:'7화. 날카로운 선 위에서',
+    body:'<p>전체 리딩이 열리는 대회의실 앞에서 윤정은 잠깐 멈췄다.</p><p>손에 든 대본을 천천히 다시 쥐었다.</p><p>수십 번을 들춰봤던 대본인데, 오늘따라 묘한 이질감이 느껴졌다.</p><p>문을 열었다.</p><p>사람이 많았다. 제작팀, 스태프, 배우들, 뒤편에는 기자 몇 명까지.</p>'
+  }]}],activeWorkId:workId,activeDocId:docId,referenceWorkId:null,referenceDocId:null};
+}
+function parseStringArray(value){
+  try{const parsed=JSON.parse(value||'[]');return Array.isArray(parsed)?parsed.filter(v=>typeof v==='string'):[];}catch{return[];}
+}
+function normalizeImportedMarkup(rawHtml,seenIds){
+  const box=document.createElement('div');box.innerHTML=String(rawHtml||'');
+  const ids=seenIds||new Set();
+  box.querySelectorAll(ANN_SELECTOR).forEach(el=>{
+    let id=el.dataset.id||'';
+    if(!id||ids.has(id)){id=uid('a');el.dataset.id=id;}
+    ids.add(id);
+    if(el.classList.contains('modified')){
+      let versions=parseStringArray(el.dataset.versions);
+      if(!versions.length){
+        const history=parseStringArray(el.dataset.history);
+        const original=el.dataset.original||history[0]||el.textContent||'';
+        const current=el.dataset.current||el.textContent||original;
+        versions=history.length?history.slice():[original];
+        if(!versions.length||versions[0]!==original)versions.unshift(original);
+        if(versions[versions.length-1]!==current)versions.push(current);
+      }
+      if(!versions.length)versions=[el.textContent||''];
+      el.dataset.versions=JSON.stringify(versions);
+      if(!el.dataset.original)el.dataset.original=versions[0]||'';
+      if(!el.dataset.current)el.dataset.current=versions[versions.length-1]||el.textContent||'';
+    }else if(el.classList.contains('deleted')){
+      if(!el.dataset.original)el.dataset.original=el.textContent||'';
+    }else if(el.classList.contains('suggestion')){
+      if(!el.dataset.original)el.dataset.original=el.textContent||'';
+      if(el.dataset.suggestion===undefined)el.dataset.suggestion='';
+    }else if(el.classList.contains('memo')){
+      if(!el.dataset.memo)el.dataset.memo=el.textContent||'';
+    }
+  });
+  return box.innerHTML;
+}
+function projectSummary(p){
+  const works=Array.isArray(p?.works)?p.works:[];
+  return{workCount:works.length,docCount:works.reduce((sum,w)=>sum+(Array.isArray(w.docs)?w.docs.length:0),0)};
 }
 function normalizeProject(data){
   if(data&&Array.isArray(data.docs)&&!Array.isArray(data.works)){
-    data={version:data.version,works:[{id:uid('w'),title:data.projectTitle||'기존 작품',expanded:true,lastActiveDocId:data.activeId||null,docs:data.docs}],activeWorkId:null,activeDocId:data.activeId||null,referenceWorkId:null,referenceDocId:data.referenceId||null};
+    const oldWorkId=data.workId||uid('w');
+    data={version:data.version,works:[{id:oldWorkId,title:data.projectTitle||'기존 작품',expanded:true,lastActiveDocId:data.activeId||null,docs:data.docs}],activeWorkId:oldWorkId,activeDocId:data.activeId||null,referenceWorkId:data.referenceId?oldWorkId:null,referenceDocId:data.referenceId||null};
   }
-  if(!data||!Array.isArray(data.works))return seedProject();
-  const p={version:VERSION,works:[],activeWorkId:data.activeWorkId||null,activeDocId:data.activeDocId||null,referenceWorkId:data.referenceWorkId||null,referenceDocId:data.referenceDocId||null};
+  if(!data||!Array.isArray(data.works))return emptyProject();
+  const seenAnnotationIds=new Set();
+  const p={version:VERSION,sourceVersion:String(data.version||''),works:[],activeWorkId:data.activeWorkId||null,activeDocId:data.activeDocId||data.activeId||null,referenceWorkId:data.referenceWorkId||null,referenceDocId:data.referenceDocId||data.referenceId||null};
   p.works=data.works.map((w,wi)=>({
     id:w.id||uid('w'),title:w.title||`작품 ${wi+1}`,_open:w._open!==undefined?w._open:(w.expanded!==false),lastActiveDocId:w.lastActiveDocId||null,
-    docs:Array.isArray(w.docs)?w.docs.map((d,di)=>({id:d.id||uid('d'),title:d.title||`회차 ${di+1}`,body:d.body??d.html??''})):[]
+    docs:Array.isArray(w.docs)?w.docs.map((d,di)=>({
+      id:d.id||uid('d'),title:d.title||`회차 ${di+1}`,
+      body:normalizeImportedMarkup(d.body??d.html??d.content??'',seenAnnotationIds)
+    })):[]
   }));
   repairProject(p);
   return p;
@@ -456,7 +507,7 @@ function repairProject(p=project){
   p.works=Array.isArray(p.works)?p.works:[];
   p.works.forEach((w,wi)=>{
     w.id=w.id||uid('w');w.title=w.title||`작품 ${wi+1}`;w._open=w._open!==false;w.docs=Array.isArray(w.docs)?w.docs:[];
-    w.docs=w.docs.map((d,di)=>({id:d.id||uid('d'),title:d.title||`회차 ${di+1}`,body:d.body??d.html??''}));
+    w.docs=w.docs.map((d,di)=>({id:d.id||uid('d'),title:d.title||`회차 ${di+1}`,body:String(d.body??d.html??'')}));
     if(!w.docs.some(d=>d.id===w.lastActiveDocId))w.lastActiveDocId=w.docs[0]?.id||null;
   });
   if(!p.works.some(w=>w.id===p.activeWorkId))p.activeWorkId=p.works[0]?.id||null;
@@ -484,8 +535,8 @@ function referenceInfo(){const work=findWork(project.referenceWorkId),doc=findDo
 function saveProject(showStatus=true){
   const doc=activeDoc();if(doc)doc.body=editor.innerHTML;
   repairProject(project);
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(project));syncReferenceBodies();if(showStatus)flashSaved();}
-  catch{saveStatus.textContent='저장 실패';saveStatus.style.color='#a13a3a';}
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(project));syncReferenceBodies();if(showStatus)flashSaved();return true;}
+  catch(error){console.error(error);saveStatus.textContent='저장 실패';saveStatus.style.color='#a13a3a';return false;}
 }
 let saveTimer=null;
 function scheduleSave(){saveStatus.textContent='저장 중…';saveStatus.style.color='';clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(),450);}
@@ -525,11 +576,12 @@ function renderLibrary(){
     toggle.setAttribute('aria-expanded',String(work._open!==false));
     toggle.onclick=e=>{e.stopPropagation();toggleWorkPanel(work.id);};
     const name=document.createElement('button');name.className='work-name';name.textContent=work.title;
-    name.title=isTablet()?'작품 열기':'작품 회차 접기·펼치기';
+    name.title=isTablet()?'작품 열기':'작품 회차 접기·펼치기';name.setAttribute('aria-expanded',String(work._open!==false));
     name.onclick=e=>{e.stopPropagation();if(isTablet())activateWork(work.id);else toggleWorkPanel(work.id);};
+    const count=document.createElement('span');count.className='work-count';count.textContent=String(work.docs.length);count.title=`회차 ${work.docs.length}개`;
     const menu=document.createElement('button');menu.className='lib-item-menu';menu.textContent='⋮';menu.title='작품 옵션';menu.onclick=e=>{e.stopPropagation();openLibraryActionSheet('work',work.id,null);};
     row.onclick=e=>{if(e.target.closest('.lib-item-menu,.work-toggle,.work-name'))return;if(isTablet())activateWork(work.id);else toggleWorkPanel(work.id);};
-    row.append(toggle,name,menu);group.appendChild(row);
+    row.append(toggle,name,count,menu);group.appendChild(row);
     if(work._open){
       const episodes=document.createElement('div');episodes.className='episode-list';
       if(!work.docs.length){const empty=document.createElement('div');empty.className='lib-empty';empty.textContent='아직 회차가 없습니다.';episodes.appendChild(empty);}
@@ -1006,9 +1058,9 @@ function copyText(text,msg){
   if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>flashSnack(msg)).catch(()=>fallbackCopy(text,msg));else fallbackCopy(text,msg);
 }
 function fallbackCopy(text,msg){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();flashSnack(msg);}
-function readFileText(file){return typeof file.text==='function'?file.text():new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsText(file);});}
+function readFileText(file){if(file&&typeof file.text==='function')return file.text();return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(r.error||new Error('파일 읽기 실패'));r.readAsText(file,'utf-8');});}
 function exportTxt(){const d=activeDoc();if(!d){flashSnack('열린 회차가 없습니다.');return;}downloadFile(finalTextFrom(editor),`${safeName(d.title)}.txt`);flashSnack('TXT 최종 원고를 내보냈습니다.');}
-function exportJson(){saveProject(false);const data=JSON.parse(JSON.stringify(project));data.version=VERSION;data.exportedAt=new Date().toISOString();data.works.forEach(w=>{w.expanded=w._open!==false;w.docs.forEach(d=>{d.html=d.body||'';});});downloadFile(JSON.stringify(data,null,2),`Story_Patcher_프로젝트_${timestamp()}.json`,'application/json;charset=utf-8');flashSnack('프로젝트 JSON을 내보냈습니다.');}
+function exportJson(){saveProject(false);const data=JSON.parse(JSON.stringify(project));data.format='story-patcher-project';data.schemaVersion=1;data.version=VERSION;data.exportedAt=new Date().toISOString();data.works.forEach(w=>{w.expanded=w._open!==false;w.docs.forEach(d=>{d.html=d.body||'';});});downloadFile(JSON.stringify(data,null,2),`Story_Patcher_프로젝트_${timestamp()}.json`,'application/json;charset=utf-8');flashSnack('PC·모바일 호환 JSON을 내보냈습니다.');}
 function duplicateActiveDoc(){const w=activeWork(),d=activeDoc();if(w&&d)duplicateEpisode(w.id,d.id);}
 async function importTxtFiles(files){
   if(!files.length)return;let w=activeWork();if(!w){w={id:uid('w'),title:'가져온 작품',docs:[],_open:true,lastActiveDocId:null};project.works.push(w);project.activeWorkId=w.id;}
@@ -1017,13 +1069,48 @@ async function importTxtFiles(files){
 }
 function textToHtml(text){return esc(String(text||'').replace(/\r\n?/g,'\n')).split(/\n{2,}/).map(b=>`<p>${b.replace(/\n/g,'<br>')}</p>`).join('');}
 async function importJsonFile(file){
-  try{const data=JSON.parse(await readFileText(file));if(!data||!Array.isArray(data.works))throw new Error('Story Patcher 프로젝트 형식이 아닙니다.');
-    const apply=()=>{project=normalizeProject(data);loadActiveIntoEditor();saveProject();flashSnack('프로젝트 JSON을 불러왔습니다.');};
-    if(project.works.length)showConfirmModal('프로젝트 불러오기','현재 프로젝트를 불러온 JSON으로 교체할까요? 먼저 필요한 작업을 백업해 주세요.','교체',apply,true);else apply();
-  }catch(e){showConfirmModal('불러오기 실패',e.message||'JSON 파일을 읽지 못했습니다.','확인',()=>{});}
+  if(!file)return;
+  saveStatus.textContent='JSON 읽는 중…';saveStatus.style.color='';
+  try{
+    const raw=(await readFileText(file)).replace(/^\uFEFF/,'');
+    const data=JSON.parse(raw);
+    if(!data||(!Array.isArray(data.works)&&!Array.isArray(data.docs)))throw new Error('Story Patcher 프로젝트 형식이 아닙니다.');
+    const imported=normalizeProject(data);
+    const summary=projectSummary(imported);
+    if(!summary.workCount||!summary.docCount)throw new Error('작품 또는 회차가 없는 프로젝트입니다.');
+    const sourceVersion=String(data.version||'이전 버전');
+    const apply=()=>{
+      project=imported;
+      normalizeMobileLibraryOpenState(project.activeWorkId);
+      loadActiveIntoEditor();
+      const stored=saveProject(false);
+      if(stored){flashSaved();flashSnack(`PC 프로젝트 v${sourceVersion} · 작품 ${summary.workCount}개 · 회차 ${summary.docCount}개를 불러왔습니다.`);}
+      else{
+        showConfirmModal('불러오기는 완료했습니다',`작품 ${summary.workCount}개와 회차 ${summary.docCount}개를 현재 화면에 열었지만 브라우저 저장공간에 보관하지 못했습니다. 즉시 프로젝트 JSON을 다시 내보내 백업해 주세요.`,'확인',()=>{});
+      }
+    };
+    if(project.works.length)showConfirmModal('프로젝트 불러오기',`현재 프로젝트를 PC 프로젝트 v${sourceVersion}로 교체할까요?\n\n작품 ${summary.workCount}개 · 회차 ${summary.docCount}개`,'교체',apply,true);else apply();
+  }catch(error){
+    console.error(error);flashSaved();showConfirmModal('불러오기 실패',error?.message||'JSON 파일을 읽지 못했습니다.','확인',()=>{});
+  }
 }
-txtImportInput.onchange=async e=>{const files=[...(e.target.files||[])];e.target.value='';await importTxtFiles(files);};
-jsonImportInput.onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(file)await importJsonFile(file);};
+function prepareFileInput(input){input.value='';}
+function bindFileLabel(label,input){
+  if(!label||!input)return;
+  label.addEventListener('pointerdown',()=>prepareFileInput(input));
+  label.addEventListener('click',()=>{menuSheet.classList.remove('show');});
+  label.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    event.preventDefault();prepareFileInput(input);menuSheet.classList.remove('show');
+    try{if(typeof input.showPicker==='function')input.showPicker();else input.click();}catch{input.click();}
+  });
+}
+bindFileLabel(txtImportLabel,txtImportInput);
+bindFileLabel(jsonImportLabel,jsonImportInput);
+txtImportInput.addEventListener('click',()=>prepareFileInput(txtImportInput));
+jsonImportInput.addEventListener('click',()=>prepareFileInput(jsonImportInput));
+txtImportInput.onchange=async event=>{const files=[...(event.target.files||[])];event.target.value='';await importTxtFiles(files);};
+jsonImportInput.onchange=async event=>{const file=event.target.files?.[0];event.target.value='';if(file)await importJsonFile(file);};
 function openExportOptions(){
   modalBox.innerHTML='<h3>내보내기</h3><div class="row" style="flex-direction:column"><button id="opTxt">TXT 최종 원고</button><button id="opAi">AI 교정 지시서</button><button id="opJson">프로젝트 JSON 백업</button><button id="opClose">닫기</button></div>';
   modalScrim.classList.add('show');$('#opTxt').onclick=()=>{closeModal();exportTxt();};$('#opAi').onclick=()=>{closeModal();buildExportDialog();};$('#opJson').onclick=()=>{closeModal();exportJson();};$('#opClose').onclick=closeModal;
@@ -1034,7 +1121,7 @@ menuBtn.addEventListener('click',e=>{e.stopPropagation();menuSheet.classList.tog
 document.addEventListener('click',e=>{if(!menuSheet.contains(e.target)&&e.target!==menuBtn)menuSheet.classList.remove('show');});
 menuSheet.addEventListener('click',e=>{
   const m=e.target.closest('[data-m]');if(!m)return;menuSheet.classList.remove('show');const action=m.dataset.m;
-  if(action==='exportAi')buildExportDialog();else if(action==='exportTxt')exportTxt();else if(action==='importTxt')txtImportInput.click();else if(action==='exportJson')exportJson();else if(action==='importJson')jsonImportInput.click();else if(action==='duplicateDoc')duplicateActiveDoc();
+  if(action==='exportAi')buildExportDialog();else if(action==='exportTxt')exportTxt();else if(action==='exportJson')exportJson();else if(action==='duplicateDoc')duplicateActiveDoc();
   else if(action==='renameDoc'){const w=activeWork(),d=activeDoc();if(w&&d)renameEpisode(w.id,d.id);}
   else if(action==='deleteDoc'){const w=activeWork(),d=activeDoc();if(w&&d)deleteEpisode(w.id,d.id);}
 });
@@ -1070,7 +1157,7 @@ function boot(){repairProject(project);normalizeMobileLibraryOpenState();loadAct
 boot();
 
 // Small test surface used only by automated checks; harmless in normal use.
-window.__STORY_PATCHER_TEST__={finalText:()=>finalTextFrom(editor),aiText:buildAiText,getProject:()=>project,openPreview,annotationsInRange,duplicateWork,duplicateEpisode,openReference,closeReference,inline:()=>inlineState?{mode:inlineState.mode,editableText:inlineState.editable?.textContent,targetText:inlineState.target?.textContent,editableConnected:inlineState.editable?.isConnected,targetConnected:inlineState.target?.isConnected}:null,confirm:confirmInline,cancel:cancelInline};
+window.__STORY_PATCHER_TEST__={finalText:()=>finalTextFrom(editor),aiText:buildAiText,getProject:()=>project,normalizeProjectData:data=>normalizeProject(data),applyProjectData:data=>{project=normalizeProject(data);normalizeMobileLibraryOpenState(project.activeWorkId);loadActiveIntoEditor();return projectSummary(project);},openPreview,annotationsInRange,duplicateWork,duplicateEpisode,openReference,closeReference,inline:()=>inlineState?{mode:inlineState.mode,editableText:inlineState.editable?.textContent,targetText:inlineState.target?.textContent,editableConnected:inlineState.editable?.isConnected,targetConnected:inlineState.target?.isConnected}:null,confirm:confirmInline,cancel:cancelInline};
 })();
 </script>
 </body>
