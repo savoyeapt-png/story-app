@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Story Patcher · Mobile v0.3.3</title>
+<title>Story Patcher · Mobile v0.3.4</title>
 <style>
 :root{
   --bg:#faf8f5; --paper:#fffdfb; --ink:#2b2620; --sub:#7d7568; --line:#e7e1d6;
@@ -15,15 +15,17 @@
   --accent:#b5482e; --accent-ink:#fff;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
+  --app-height: 100vh;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;overscroll-behavior:none}
+html,body{width:100%;height:100%;margin:0;overscroll-behavior:none;overflow:hidden}
 body{
   font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   background:#1c1a17; color:var(--ink); display:flex; justify-content:center;
+  min-height:100%; touch-action:manipulation;
 }
 #device{
-  width:100%; max-width:480px; min-height:100vh; background:var(--bg);
+  width:100%; max-width:480px; height:100vh; height:var(--app-height,100vh); min-height:0; max-height:var(--app-height,100vh); background:var(--bg);
   display:flex; flex-direction:column; position:relative; overflow:hidden;
   box-shadow:0 0 40px rgba(0,0,0,.4);
 }
@@ -39,9 +41,9 @@ body{
 .title small{display:block;font-size:11px;font-weight:500;color:var(--sub)}
 
 /* ---------- editor ---------- */
-.stage{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.paper-scroll{flex:1;overflow-y:auto;padding:22px 20px 140px;-webkit-overflow-scrolling:touch}
-#editor{font-size:17px;line-height:1.9;outline:none;min-height:60vh;white-space:pre-wrap;word-break:keep-all}
+.stage{flex:1 1 auto;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.paper-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:22px 20px 150px;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;scroll-padding-top:24px;scroll-padding-bottom:170px}
+#editor{font-size:17px;line-height:1.9;outline:none;min-height:100%;white-space:pre-wrap;word-break:keep-all}
 #editor:empty:before{content:"문서함에서 회차를 열거나 새로 추가해 주세요.";color:#b3aa9c}
 #editor:focus{caret-color:var(--accent)}
 .modified{background:var(--modified);border-radius:2px;padding:0 1px}
@@ -71,6 +73,8 @@ body{
   border-top:1px solid var(--line); background:var(--paper); z-index:20;
 }
 .statusbar .saved{color:#4c8c5b;font-weight:600}
+#device.keyboard-open .paper-scroll{padding-bottom:118px;scroll-padding-bottom:132px}
+#device.keyboard-open .statusbar{padding-top:5px;padding-bottom:calc(5px + var(--safe-b))}
 
 /* ---------- PATCH floating button + radial ---------- */
 .patch-fab{
@@ -78,7 +82,7 @@ body{
   border-radius:50%; border:none; background:var(--accent); color:var(--accent-ink);
   font-size:13px; font-weight:800; letter-spacing:.02em; box-shadow:0 6px 16px rgba(181,72,46,.4);
   z-index:30; display:flex; align-items:center;justify-content:center; cursor:pointer;
-  transition:transform .15s ease;
+  transition:transform .15s ease;touch-action:manipulation;user-select:none;-webkit-user-select:none;
 }
 .patch-fab.disabled{background:#c7bfae;box-shadow:none}
 .patch-fab.open{transform:scale(.94)}
@@ -155,7 +159,7 @@ body{
 .note-line{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.6}
 
 /* ---------- document library slide-over ---------- */
-.main-col{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+.main-col{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;min-height:0;height:100%;position:relative;overflow:hidden}
 .lib-scrim{position:absolute;inset:0;background:rgba(20,17,12,.34);z-index:59;opacity:0;pointer-events:none;transition:opacity .2s}
 .lib-scrim.show{opacity:1;pointer-events:auto}
 .lib{
@@ -412,7 +416,7 @@ const uid=(p='n')=>p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const cleanEditableText=s=>String(s??'').replace(/[\u200B\u2060]/g,'');
 
-const editor=$('#editor'), paperScroll=$('#paperScroll');
+const editor=$('#editor'), paperScroll=$('#paperScroll'), stage=$('#stage'), device=$('#device');
 const patchFab=$('#patchFab'), radialMenu=$('#radialMenu'), radialScrim=$('#radialScrim'), selCount=$('#selCount');
 const actionbar=$('#actionbar'), actionbarKind=$('#actionbarKind'), actOriginal=$('#actOriginal'), actCancel=$('#actCancel'), actConfirm=$('#actConfirm');
 const snackbar=$('#snackbar'), snackbarText=$('#snackbarText'), snackbarUndo=$('#snackbarUndo');
@@ -429,12 +433,27 @@ const modalScrim=$('#modalScrim'), modalBox=$('#modalBox');
 const txtImportInput=$('#txtImportInput'), jsonImportInput=$('#jsonImportInput'), txtImportLabel=$('#txtImportLabel'), jsonImportLabel=$('#jsonImportLabel');
 const isTablet=()=>window.innerWidth>=840;
 
-const VERSION='0.3.3';
+const VERSION='0.3.4';
 const STORAGE_KEY='story_patcher_mobile_v03';
 const LEGACY_KEYS=['story_patcher_mobile_v02','story_patcher_mobile_v01'];
 const ANN_SELECTOR='.modified,.added,.suggestion,.deleted,.memo';
 const EXPORT_SELECTOR='.modified,.added,.suggestion,.deleted';
 const BLOCK_TAGS=new Set(['P','DIV','LI','BLOCKQUOTE','H1','H2','H3','H4','H5','H6','SECTION','ARTICLE']);
+
+/* ---------------- visible viewport / mobile keyboard ---------------- */
+function syncVisibleViewport(){
+  const vv=window.visualViewport;
+  const height=Math.max(320,Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight));
+  document.documentElement.style.setProperty('--app-height',`${height}px`);
+  const layoutHeight=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);
+  device.classList.toggle('keyboard-open',!!vv&&layoutHeight-height>110);
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',syncVisibleViewport,{passive:true});
+  window.visualViewport.addEventListener('scroll',syncVisibleViewport,{passive:true});
+}
+window.addEventListener('resize',syncVisibleViewport,{passive:true});
+window.addEventListener('orientationchange',()=>setTimeout(syncVisibleViewport,100),{passive:true});
 
 /* ---------------- data / project ---------------- */
 let project=loadProject();
@@ -754,7 +773,7 @@ function annotationsInRange(range){
   $all(ANN_SELECTOR,editor).forEach(el=>{try{if(range.intersectsNode(el))found.add(el);}catch{}});
   return [...found];
 }
-function closeRadial(){radialMenu.classList.remove('show');radialMenu.innerHTML='';radialScrim.classList.remove('show');patchFab.classList.remove('open');}
+function closeRadial(){radialMenu.classList.remove('show');radialMenu.innerHTML='';radialScrim.classList.remove('show');patchFab.classList.remove('open');patchContextLocked=false;}
 function fanPositions(n){
   if(n<=2)return [{x:-8,y:-88},{x:-112,y:-28}];
   if(n===3)return [{x:-6,y:-142},{x:-112,y:-88},{x:-112,y:-22}];
@@ -780,13 +799,37 @@ function refreshSelectionState(){
   selectedText=sel.toString();selectedAnnotations=annotationsInRange(range);selectionMode=true;
   selCount.textContent=`선택 ${Array.from(selectedText.replace(/\s/g,'')).length}자`;selCount.style.display='block';
 }
-document.addEventListener('selectionchange',()=>{if(inlineState)return;const sel=getSelection();if(sel?.rangeCount&&editor.contains(sel.anchorNode))refreshSelectionState();});
-patchFab.addEventListener('pointerdown',e=>e.preventDefault());
+let patchContextLocked=false;
+function savedSelectionIsUsable(){
+  try{return !!(selectionMode&&savedRange&&!savedRange.collapsed&&selectedText.trim()&&editor.contains(savedRange.commonAncestorContainer));}
+  catch{return false;}
+}
+function capturePatchContext(){
+  if(inlineState)return;
+  const sel=getSelection();
+  if(!sel?.rangeCount)return;
+  const range=sel.getRangeAt(0);
+  if(!editor.contains(range.commonAncestorContainer)&&!editor.contains(sel.anchorNode))return;
+  savedRange=range.cloneRange();
+  if(range.collapsed){selectionMode=false;selectedText='';selectedAnnotations=[];selCount.style.display='none';}
+  else{
+    selectedText=sel.toString();selectionMode=!!selectedText.trim();selectedAnnotations=annotationsInRange(savedRange);
+    if(selectionMode){selCount.textContent=`선택 ${Array.from(selectedText.replace(/\s/g,'')).length}자`;selCount.style.display='block';}
+  }
+}
+document.addEventListener('selectionchange',()=>{
+  if(inlineState||patchContextLocked)return;
+  const sel=getSelection();if(sel?.rangeCount&&editor.contains(sel.anchorNode))refreshSelectionState();
+});
+patchFab.addEventListener('pointerdown',e=>{capturePatchContext();patchContextLocked=true;e.preventDefault();});
+patchFab.addEventListener('touchstart',capturePatchContext,{passive:true});
 patchFab.addEventListener('click',()=>{
   if(radialMenu.classList.contains('show')){closeRadial();return;}
-  refreshSelectionState();
-  if(selectionMode&&selectedText){
-    if(selectedAnnotations.length){openRestoreConfirm();return;}
+  if(!savedSelectionIsUsable()){
+    const sel=getSelection();if(sel?.rangeCount&&editor.contains(sel.anchorNode))refreshSelectionState();
+  }
+  if(savedSelectionIsUsable()){
+    if(selectedAnnotations.length){patchContextLocked=false;openRestoreConfirm();return;}
     buildRadial([
       {act:'modify',label:'수정',onSelect:startModify},
       {act:'suggest',label:'제안',onSelect:startSuggest},
@@ -794,9 +837,10 @@ patchFab.addEventListener('click',()=>{
       {act:'delete',label:'삭제',onSelect:doDeleteSelection}
     ]);
   }else{
-    if(!savedCaretRange()){flashSnack('본문 안에 커서를 먼저 놓아주세요.');return;}
+    if(!savedCaretRange()){patchContextLocked=false;flashSnack('본문 안에 커서를 먼저 놓아주세요.');return;}
     buildRadial([{act:'add',label:'추가',onSelect:startAdd},{act:'memo',label:'메모',onSelect:startMemo}]);
   }
+  setTimeout(()=>{patchContextLocked=false;},80);
 });
 radialScrim.addEventListener('click',closeRadial);
 function savedCaretRange(){
@@ -809,7 +853,9 @@ function savedCaretRange(){
   }
   return savedRange&&editor.contains(savedRange.startContainer)?savedRange:null;
 }
-['touchend','mouseup','keyup'].forEach(type=>editor.addEventListener(type,()=>setTimeout(()=>{if(!inlineState)savedCaretRange();},0)));
+['touchend','mouseup','keyup'].forEach(type=>editor.addEventListener(type,()=>setTimeout(()=>{if(!inlineState){savedCaretRange();patchFab.style.display='flex';}},0)));
+editor.addEventListener('focusin',()=>{if(!inlineState)patchFab.style.display='flex';});
+editor.addEventListener('pointerdown',()=>{if(!inlineState)patchFab.style.display='flex';});
 function restoreAnnotation(el){
   if(!el?.isConnected)return;
   if(el.classList.contains('modified'))el.replaceWith(document.createTextNode(getVersions(el)[0]||el.dataset.original||el.textContent));
@@ -1153,7 +1199,11 @@ editor.addEventListener('keydown',e=>{
 editor.addEventListener('blur',()=>{/* explicit confirm/cancel only */});
 
 /* ---------------- boot ---------------- */
-function boot(){repairProject(project);normalizeMobileLibraryOpenState();loadActiveIntoEditor();flashSaved();if(isTablet())libPanel.classList.add('show');renderReference();}
+function boot(){
+  syncVisibleViewport();
+  repairProject(project);normalizeMobileLibraryOpenState();loadActiveIntoEditor();flashSaved();if(isTablet())libPanel.classList.add('show');renderReference();
+  requestAnimationFrame(syncVisibleViewport);
+}
 boot();
 
 // Small test surface used only by automated checks; harmless in normal use.
