@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Story Patcher · Mobile v0.4.1</title>
+<title>Story Patcher · Mobile v0.4.2</title>
 <style>
 :root{
   --bg:#faf8f5; --paper:#fffdfb; --ink:#2b2620; --sub:#7d7568; --line:#e7e1d6;
@@ -54,17 +54,22 @@ body{
 .memo{display:inline-block;background:var(--memo);color:#3d5160;border:1px dashed var(--memo-line);
   border-radius:5px;padding:1px 6px;font-size:.85em}
 .memo::before{content:"메모";font-size:9px;font-weight:800;color:#5c7180;margin-right:4px}
-.pending-edit{outline:2px solid var(--accent);outline-offset:1px;border-radius:3px;padding:0 2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.pending-edit.is-empty{min-width:1.2em}
-.modified.pending-edit.is-empty::after,.added.pending-edit.is-empty::after{content:"내용 입력";color:#b8aa9a;font-size:.82em}
-.inline-edit-buffer{display:inline-block;min-width:1.2em;min-height:1.2em;outline:none;white-space:pre-wrap;word-break:keep-all;vertical-align:baseline}
-.inline-edit-buffer.is-empty::after{content:attr(data-placeholder);color:#b8aa9a;font-size:.82em}
-.modified.pending-edit,.added.pending-edit{display:inline-block;min-width:1.25em;vertical-align:baseline}
+.pending-edit{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.modified.pending-edit,.added.pending-edit{display:block;width:100%;min-width:0;margin:.35em 0;padding:7px 9px;vertical-align:baseline}
 .pending-target{outline:1px solid currentColor;outline-offset:1px}
-.inline-note-editor{display:block;min-height:50px;margin:10px 0;padding:10px 12px;border-radius:9px;white-space:pre-wrap;word-break:break-word;line-height:1.65}
+.inline-textarea{
+  display:block;width:100%;min-width:0;max-width:100%;margin:0;border:0;outline:0;resize:none;
+  overflow-y:hidden;background:transparent;color:inherit;padding:0;border-radius:0;
+  font:inherit;font-size:inherit;line-height:1.75;letter-spacing:inherit;text-align:inherit;
+  white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;caret-color:var(--accent);
+  -webkit-appearance:none;appearance:none;-webkit-text-size-adjust:100%;touch-action:manipulation;
+}
+.inline-textarea::placeholder{color:#a89d90;opacity:.9}
+.inline-edit-buffer{min-height:2.15em}
+.inline-note-editor{display:block;min-height:78px;margin:10px 0;padding:10px 12px;border-radius:9px;line-height:1.65}
 .inline-note-editor.suggest-note{background:var(--suggested);border:1px solid var(--suggested-line)}
 .inline-note-editor.memo-note{background:var(--memo);border:1px solid var(--memo-line);color:#334956}
-.inline-note-editor.is-empty::before{content:attr(data-placeholder);color:#998f84;pointer-events:none}
+.inline-textarea[readonly]{cursor:default;opacity:.92}
 .edit-marker{display:inline-block!important;width:0!important;height:0!important;overflow:hidden!important;font-size:0!important;line-height:0!important;vertical-align:baseline!important}
 
 /* ---------- bottom status ---------- */
@@ -455,7 +460,7 @@ const modalScrim=$('#modalScrim'), modalBox=$('#modalBox');
 const txtImportInput=$('#txtImportInput'), jsonImportInput=$('#jsonImportInput'), txtImportLabel=$('#txtImportLabel'), jsonImportLabel=$('#jsonImportLabel');
 const isTablet=()=>window.innerWidth>=840;
 
-const VERSION='0.4.1';
+const VERSION='0.4.2';
 const PATCH_POSITION_KEY='story_patcher_ui_patch_position';
 const HISTORY_LIMIT=8;
 const ANN_SELECTOR='.modified,.added,.suggestion,.deleted,.memo';
@@ -504,6 +509,7 @@ function parseStringArray(value){
 function normalizeImportedMarkup(rawHtml,seenIds){
   const box=document.createElement('div');box.innerHTML=String(rawHtml||'');
   const ids=seenIds||new Set();
+  box.querySelectorAll('.inline-textarea,.edit-marker').forEach(el=>el.remove());
   box.querySelectorAll(ANN_SELECTOR).forEach(el=>{
     let id=el.dataset.id||'';
     if(!id||ids.has(id)){id=uid('a');el.dataset.id=id;}
@@ -590,7 +596,7 @@ function updateSaveStatus(){
 function markProjectDirty(){projectDirty=true;updateSaveStatus();}
 function markProjectClean(){projectDirty=false;hasJsonBaseline=true;updateSaveStatus();}
 function persistActiveToMemory(){
-  const doc=activeDoc();if(!doc)return false;
+  const doc=activeDoc();if(!doc||inlineState)return false;
   const html=editor.innerHTML;
   if(doc.body===html)return false;
   doc.body=html;return true;
@@ -600,9 +606,9 @@ function saveProject(showStatus=true){
   if(showStatus||changed)markProjectDirty();
   return true;
 }
-function scheduleSave(){persistActiveToMemory();repairProject(project);syncReferenceBodies();markProjectDirty();}
+function scheduleSave(){if(inlineState){markProjectDirty();return;}persistActiveToMemory();repairProject(project);syncReferenceBodies();markProjectDirty();}
 function flashSaved(){markProjectClean();}
-window.addEventListener('beforeunload',event=>{if(!projectDirty)return;event.preventDefault();event.returnValue='';});
+window.addEventListener('beforeunload',event=>{if(!projectDirty&&!inlineState)return;event.preventDefault();event.returnValue='';});
 
 /* ---------------- in-memory undo / redo ---------------- */
 let undoStack=[],redoStack=[],typingHistoryOpen=false,typingHistoryTimer=0;
@@ -799,7 +805,7 @@ function cloneEpisodeBody(body){
   const box=document.createElement('div');box.innerHTML=body||'';
   $all('[data-id]',box).forEach(el=>{el.dataset.id=uid('a');});
   $all('.pending-edit',box).forEach(el=>{el.classList.remove('pending-edit','show-original');el.removeAttribute('contenteditable');});
-  $all('.inline-note-editor,.edit-marker',box).forEach(el=>el.remove());
+  $all('.inline-note-editor,.inline-edit-buffer,.edit-marker',box).forEach(el=>el.remove());
   return box.innerHTML;
 }
 function duplicateEpisode(workId,docId){
@@ -905,6 +911,7 @@ function finalTextFrom(root){
     if(node.nodeType!==Node.ELEMENT_NODE)return;
     const el=node;
     if(el.matches('.edit-marker,.inline-note-editor'))return;
+    if(el.tagName==='TEXTAREA'){out+=el.value||'';return;}
     if(el.classList.contains('deleted'))return;
     if(el.classList.contains('memo')){out+=el.dataset.original||'';return;}
     if(el.classList.contains('suggestion')){out+=el.dataset.original||el.textContent;return;}
@@ -1028,37 +1035,43 @@ function openRestoreConfirm(){
   });
 }
 
-/* ---------------- robust inline editing ---------------- */
+/* ---------------- native textarea inline editing (IME-safe) ---------------- */
 let inlineState=null;
 function makeMarker(){const m=document.createElement('span');m.className='edit-marker';m.contentEditable='false';m.textContent='\u2060';return m;}
 function attachMarkers(el){const before=makeMarker(),after=makeMarker();el.before(before);el.after(after);return{before,after};}
 function removeMarkers(state=inlineState){state?.markers?.before?.remove();state?.markers?.after?.remove();}
-function editableValue(el){
-  if(!el)return'';let out='';
-  const walk=node=>{
-    if(node.nodeType===Node.TEXT_NODE){out+=cleanEditableText(node.data);return;}
-    if(node.nodeType!==Node.ELEMENT_NODE)return;
-    if(node.tagName==='BR'){out+='\n';return;}
-    [...node.childNodes].forEach(walk);
-  };
-  [...el.childNodes].forEach(walk);return out;
+function isInlineTextarea(el){return!!(el&&el.tagName==='TEXTAREA'&&el.classList.contains('inline-textarea'));}
+function editableValue(el){return isInlineTextarea(el)?String(el.value||'').replace(/\r\n?/g,'\n'):'';}
+function maxInlineTextareaHeight(){
+  const vh=window.visualViewport?.height||window.innerHeight||640;
+  return Math.max(120,Math.min(360,Math.floor(vh*.42)));
+}
+function autoSizeInlineTextarea(el){
+  if(!isInlineTextarea(el)||!el.isConnected)return;
+  const min=el.classList.contains('inline-note-editor')?78:Math.ceil(parseFloat(getComputedStyle(editor).lineHeight||'32')*1.2);
+  const max=maxInlineTextareaHeight();
+  el.style.height='auto';
+  const wanted=Math.max(min,Math.min(max,el.scrollHeight+2));
+  el.style.height=`${wanted}px`;
+  el.style.overflowY=el.scrollHeight>max?'auto':'hidden';
 }
 function setEditableContent(el,text){
-  const value=String(text??'').replace(/\r\n?/g,'\n');el.replaceChildren();
-  if(!value){el.appendChild(document.createTextNode('\u200B'));el.classList.add('is-empty');return;}
-  const parts=value.split('\n');parts.forEach((part,index)=>{
-    if(index)el.appendChild(document.createElement('br'));
-    if(part)el.appendChild(document.createTextNode(part));
-    else if(index===parts.length-1)el.appendChild(document.createTextNode('\u200B'));
-  });
-  el.classList.remove('is-empty');
+  if(!isInlineTextarea(el))return;
+  el.value=String(text??'').replace(/\r\n?/g,'\n');
+  el.defaultValue=el.value;
+  requestAnimationFrame(()=>autoSizeInlineTextarea(el));
 }
 function focusEnd(el){
-  if(!el?.isConnected)return;el.contentEditable='true';try{el.focus({preventScroll:true});}catch{el.focus();}
-  const r=document.createRange();r.selectNodeContents(el);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  if(!isInlineTextarea(el)||!el.isConnected)return;
+  el.readOnly=false;
+  try{el.focus({preventScroll:true});}catch{el.focus();}
+  const end=el.value.length;
+  try{el.setSelectionRange(end,end);}catch{}
+  autoSizeInlineTextarea(el);
 }
 function placeCaretAfter(el){
-  if(!el?.isConnected)return;const r=document.createRange();r.setStartAfter(el);r.collapse(true);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  if(!el?.isConnected)return;
+  const r=document.createRange();r.setStartAfter(el);r.collapse(true);const s=getSelection();s.removeAllRanges();s.addRange(r);
 }
 function continueEditingAfter(el){
   if(!el?.isConnected)return false;
@@ -1075,32 +1088,54 @@ function showActionbar(kind){
   actionbar.classList.add('show');device.classList.add('inline-active');patchFab.style.display='none';selCount.style.display='none';
 }
 function hideActionbar(){actionbar.classList.remove('show');device.classList.remove('inline-active');patchFab.style.display='flex';actOriginal.textContent='원문 보기';updatePatchPlacement();}
+function bindInlineTextarea(el){
+  if(!isInlineTextarea(el)||el.dataset.bound==='1')return el;
+  el.dataset.bound='1';
+  el.addEventListener('input',()=>{
+    el.defaultValue=el.value;
+    autoSizeInlineTextarea(el);
+  });
+  el.addEventListener('compositionstart',()=>{if(inlineState?.editable===el)inlineState.composing=true;});
+  el.addEventListener('compositionend',()=>{
+    if(inlineState?.editable===el){inlineState.composing=false;autoSizeInlineTextarea(el);}
+  });
+  el.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){event.preventDefault();cancelInline();return;}
+    if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();confirmInline();}
+    // Plain Enter is deliberately left to the native textarea. This is the core IME-safety rule.
+  });
+  return el;
+}
 function beginInline(state){
-  inlineState=state;state.markers=attachMarkers(state.target||state.editable);state.editable.contentEditable='true';
+  inlineState=state;state.markers=attachMarkers(state.target||state.editable);
   if(state.mode==='modify'||state.mode==='add')state.target.classList.add('pending-edit');
   else state.editable.classList.add('pending-edit');
-  state.editable.classList.toggle('is-empty',!editableValue(state.editable));
-  showActionbar(state.mode);focusEnd(state.editable);(state.target||state.editable).scrollIntoView({block:'center',behavior:'smooth'});
+  bindInlineTextarea(state.editable);showActionbar(state.mode);
+  requestAnimationFrame(()=>{
+    autoSizeInlineTextarea(state.editable);focusEnd(state.editable);
+    (state.target||state.editable).scrollIntoView({block:'center',behavior:'smooth'});
+    setTimeout(()=>{if(inlineState===state){autoSizeInlineTextarea(state.editable);(state.target||state.editable).scrollIntoView({block:'center'});}},220);
+  });
 }
 function recreateEditableIfNeeded(){
   const st=inlineState;if(!st)return;
-  let el=st.editable;
-  if(!el?.isConnected&&st.target?.isConnected&&(st.mode==='modify'||st.mode==='add')){
-    el=document.createElement('span');el.className='inline-edit-buffer';el.contentEditable='true';setEditableContent(el,'');st.target.textContent='';st.target.appendChild(el);st.editable=el;
+  if(!st.editable?.isConnected&&st.target?.isConnected&&(st.mode==='modify'||st.mode==='add')){
+    const replacement=createInlineBuffer('',st.placeholder||'내용을 입력하세요');st.target.replaceChildren(replacement);st.editable=replacement;
   }
-  if(!el?.isConnected)return;
-  const value=editableValue(el);el.classList.toggle('is-empty',!value);
-  if(!value&&el.textContent!=='\u200B')setEditableContent(el,'');
-  const sel=getSelection();if(!value&&(!sel?.rangeCount||!el.contains(sel.anchorNode)))requestAnimationFrame(()=>focusEnd(el));
+  if(st.editable?.isConnected){bindInlineTextarea(st.editable);autoSizeInlineTextarea(st.editable);}
 }
 actCancel.onclick=cancelInline;actConfirm.onclick=confirmInline;
 actOriginal.onclick=()=>{
-  const st=inlineState;if(st?.mode!=='modify'||!st.editable)return;
-  if(!st.showingOriginal){st.buffer=editableValue(st.editable);setEditableContent(st.editable,st.original);st.editable.contentEditable='false';st.showingOriginal=true;actOriginal.textContent='수정본 보기';}
-  else{setEditableContent(st.editable,st.buffer||'');st.editable.contentEditable='true';st.showingOriginal=false;actOriginal.textContent='원문 보기';focusEnd(st.editable);}
+  const st=inlineState;if(st?.mode!=='modify'||!isInlineTextarea(st.editable))return;
+  if(!st.showingOriginal){
+    st.buffer=editableValue(st.editable);setEditableContent(st.editable,st.original);st.editable.readOnly=true;st.showingOriginal=true;actOriginal.textContent='수정본 보기';
+  }else{
+    setEditableContent(st.editable,st.buffer||'');st.editable.readOnly=false;st.showingOriginal=false;actOriginal.textContent='원문 보기';focusEnd(st.editable);
+  }
 };
 function createInlineBuffer(value='',placeholder='내용을 입력하세요'){
-  const buffer=document.createElement('span');buffer.className='inline-edit-buffer';buffer.contentEditable='true';buffer.dataset.placeholder=placeholder;setEditableContent(buffer,value);return buffer;
+  const buffer=document.createElement('textarea');buffer.className='inline-textarea inline-edit-buffer';buffer.rows=1;buffer.wrap='soft';buffer.spellcheck=false;buffer.autocomplete='off';buffer.autocapitalize='sentences';buffer.enterKeyHint='enter';buffer.placeholder=placeholder;
+  setEditableContent(buffer,value);return bindInlineTextarea(buffer);
 }
 function startModify(){
   if(!savedRange||!selectedText)return;const historyTx=beginHistoryTransaction('수정');
@@ -1112,26 +1147,27 @@ function startAdd(){
   const r=savedCaretRange();if(!r)return;const historyTx=beginHistoryTransaction('추가');
   const span=document.createElement('span');span.className='added';span.contentEditable='false';span.dataset.id=uid('a');
   const buffer=createInlineBuffer('','추가문 입력');span.appendChild(buffer);r.insertNode(span);
-  beginInline({mode:'add',editable:buffer,target:span,original:'',isNew:true,placeholder:'추가문 입력',historyTx});
+  beginInline({mode:'add',editable:buffer,target:span,original:'',isNew:true,oldValue:'',placeholder:'추가문 입력',historyTx});
 }
 function createNoteEditor(kind,value=''){
-  const input=document.createElement('span');input.className=`inline-note-editor ${kind==='suggest'?'suggest-note':'memo-note'}`;input.dataset.placeholder=kind==='suggest'?'제안 내용을 입력하세요':'메모 내용을 입력하세요';setEditableContent(input,value);return input;
+  const input=document.createElement('textarea');input.className=`inline-textarea inline-note-editor ${kind==='suggest'?'suggest-note':'memo-note'}`;input.rows=3;input.wrap='soft';input.spellcheck=false;input.autocomplete='off';input.autocapitalize='sentences';input.enterKeyHint='enter';input.placeholder=kind==='suggest'?'제안 내용을 입력하세요':'메모 내용을 입력하세요';
+  setEditableContent(input,value);return bindInlineTextarea(input);
 }
 function startSuggest(){
   if(!savedRange||!selectedText)return;const historyTx=beginHistoryTransaction('제안');
   const target=document.createElement('span');target.className='suggestion pending-target';target.contentEditable='false';target.dataset.id=uid('a');target.dataset.original=selectedText;target.textContent=selectedText;
   savedRange.deleteContents();savedRange.insertNode(target);const input=createNoteEditor('suggest');target.after(input);editor.normalize();
-  beginInline({mode:'suggest',editable:input,target,original:selectedText,isNew:true,oldValue:'',editClass:'inline-note-editor suggest-note pending-edit',placeholder:'제안 내용을 입력하세요',historyTx});
+  beginInline({mode:'suggest',editable:input,target,original:selectedText,isNew:true,oldValue:'',placeholder:'제안 내용을 입력하세요',historyTx});
 }
 function startMemo(){
   const range=selectionMode&&savedRange?savedRange.cloneRange():savedCaretRange()?.cloneRange();if(!range)return;const historyTx=beginHistoryTransaction('메모'),original=selectionMode?selectedText:'';
   const target=document.createElement('span');target.className='memo pending-target';target.contentEditable='false';target.dataset.id=uid('a');if(original){target.dataset.original=original;target.textContent=original;range.deleteContents();}else target.textContent='';
   range.insertNode(target);const input=createNoteEditor('memo');target.after(input);editor.normalize();
-  beginInline({mode:'memo',editable:input,target,original,isNew:true,oldValue:'',editClass:'inline-note-editor memo-note pending-edit',placeholder:'메모 내용을 입력하세요',historyTx});
+  beginInline({mode:'memo',editable:input,target,original,isNew:true,oldValue:'',placeholder:'메모 내용을 입력하세요',historyTx});
 }
 function startExistingNoteEdit(target,mode){
   if(inlineState)return;const historyTx=beginHistoryTransaction(mode==='suggest'?'제안 수정':'메모 수정'),oldValue=mode==='suggest'?(target.dataset.suggestion||''):(target.dataset.memo||'');const input=createNoteEditor(mode,oldValue);target.after(input);
-  beginInline({mode,editable:input,target,original:target.dataset.original||target.textContent,isNew:false,oldValue,editClass:`inline-note-editor ${mode==='suggest'?'suggest-note':'memo-note'} pending-edit`,placeholder:mode==='suggest'?'제안 내용을 입력하세요':'메모 내용을 입력하세요',historyTx});
+  beginInline({mode,editable:input,target,original:target.dataset.original||target.textContent,isNew:false,oldValue,placeholder:mode==='suggest'?'제안 내용을 입력하세요':'메모 내용을 입력하세요',historyTx});
 }
 function startExistingModify(el){
   if(inlineState)return;const historyTx=beginHistoryTransaction('다시 수정'),versions=getVersions(el),current=versions.at(-1)||'';el.textContent='';el.contentEditable='false';const buffer=createInlineBuffer(current,'수정문 입력');el.appendChild(buffer);
@@ -1150,10 +1186,10 @@ function cancelInline(){
   const st=inlineState;if(!st)return;
   if(st.mode==='modify'){
     if(st.isNew)st.target.replaceWith(document.createTextNode(st.original));
-    else{st.target.textContent=st.versions.at(-1)||st.original;st.target.contentEditable='false';st.target.classList.remove('pending-edit','show-original','is-empty');}
+    else{st.target.textContent=st.versions.at(-1)||st.original;st.target.contentEditable='false';st.target.classList.remove('pending-edit','show-original');}
   }else if(st.mode==='add'){
     if(st.isNew)st.target.remove();
-    else{st.target.textContent=st.oldValue;st.target.contentEditable='false';st.target.classList.remove('pending-edit','is-empty');}
+    else{st.target.textContent=st.oldValue;st.target.contentEditable='false';st.target.classList.remove('pending-edit');}
   }else if(st.mode==='suggest'){
     st.editable.remove();if(st.isNew)st.target.replaceWith(document.createTextNode(st.original));else st.target.classList.remove('pending-target');
   }else if(st.mode==='memo'){
@@ -1163,32 +1199,30 @@ function cancelInline(){
 }
 function confirmInline(){
   const st=inlineState;if(!st)return;
-  if(st.mode==='modify'&&st.showingOriginal){setEditableContent(st.editable,st.buffer||'');st.editable.contentEditable='true';st.showingOriginal=false;}
+  if(st.mode==='modify'&&st.showingOriginal){setEditableContent(st.editable,st.buffer||'');st.editable.readOnly=false;st.showingOriginal=false;}
   const rawValue=editableValue(st.editable);
   const value=(st.mode==='suggest'||st.mode==='memo')?rawValue.trim():rawValue;
-  if(!value.trim()){flashSnack(st.mode==='add'?'추가할 내용을 입력해 주세요.':st.mode==='modify'?'수정할 내용을 입력해 주세요.':'내용을 입력해 주세요.');recreateEditableIfNeeded();return;}
-  let undo=null,caretTarget=null;
+  if(!value.trim()){
+    flashSnack(st.mode==='add'?'추가할 내용을 입력해 주세요.':st.mode==='modify'?'수정할 내용을 입력해 주세요.':'내용을 입력해 주세요.');
+    recreateEditableIfNeeded();focusEnd(st.editable);return;
+  }
+  let caretTarget=null;
   if(st.mode==='modify'){
-    const previous=st.isNew?st.original:(st.versions.at(-1)||st.original);const versions=st.versions.slice();if(versions.at(-1)!==value)versions.push(value);
-    setModifiedVersions(st.target,versions);st.target.classList.remove('pending-edit','is-empty','show-original');st.target.contentEditable='false';caretTarget=st.target;
-    undo=()=>{if(!st.target.isConnected)return;if(st.isNew)st.target.replaceWith(document.createTextNode(st.original));else setModifiedVersions(st.target,st.versions);editor.normalize();scheduleSave();updateCharCount();};
+    const versions=st.versions.slice();if(versions.at(-1)!==value)versions.push(value);
+    setModifiedVersions(st.target,versions);st.target.classList.remove('pending-edit','show-original');st.target.contentEditable='false';caretTarget=st.target;
     flashSnack('수정문을 저장했습니다.',()=>undoAction());
   }else if(st.mode==='add'){
-    const previous=st.oldValue||'';st.target.textContent=value;st.target.classList.remove('pending-edit','is-empty');st.target.contentEditable='false';caretTarget=st.target;
-    undo=()=>{if(!st.target.isConnected)return;if(st.isNew)st.target.remove();else st.target.textContent=previous;editor.normalize();scheduleSave();updateCharCount();};
+    st.target.textContent=value;st.target.classList.remove('pending-edit');st.target.contentEditable='false';caretTarget=st.target;
     flashSnack('추가문을 저장했습니다.',()=>undoAction());
   }else if(st.mode==='suggest'){
     st.target.dataset.suggestion=value;st.target.classList.remove('pending-target');st.editable.remove();caretTarget=st.target;
-    undo=()=>{if(!st.target.isConnected)return;if(st.isNew)st.target.replaceWith(document.createTextNode(st.original));else st.target.dataset.suggestion=st.oldValue;editor.normalize();scheduleSave();};
     flashSnack('제안을 저장했습니다.',()=>undoAction());
   }else if(st.mode==='memo'){
     st.target.dataset.memo=value;st.target.classList.remove('pending-target');st.editable.remove();caretTarget=st.target;
-    undo=()=>{if(!st.target.isConnected)return;if(st.isNew){st.original?st.target.replaceWith(document.createTextNode(st.original)):st.target.remove();}else st.target.dataset.memo=st.oldValue;editor.normalize();scheduleSave();updateCharCount();};
     flashSnack('메모를 저장했습니다.',()=>undoAction());
   }
   const continueWriting=st.mode==='add'||st.mode==='memo';
-  commitHistoryTransaction(st.historyTx);
-  removeMarkers(st);inlineState=null;hideActionbar();editor.normalize();updateCharCount();scheduleSave();clearSavedSelection();
+  commitHistoryTransaction(st.historyTx);removeMarkers(st);inlineState=null;hideActionbar();editor.normalize();updateCharCount();scheduleSave();clearSavedSelection();
   if(continueWriting&&caretTarget?.isConnected)continueEditingAfter(caretTarget);
   else{if(caretTarget?.isConnected)placeCaretAfter(caretTarget);editor.blur();}
 }
@@ -1346,7 +1380,7 @@ function showManualCopy(text){
 }
 function readFileText(file){if(file&&typeof file.text==='function')return file.text();return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(r.error||new Error('파일 읽기 실패'));r.readAsText(file,'utf-8');});}
 function exportTxt(){const d=activeDoc();if(!d){flashSnack('열린 회차가 없습니다.');return;}downloadFile(finalTextFrom(editor),`${safeName(d.title)}.txt`);flashSnack('TXT 최종 원고를 내보냈습니다.');}
-function exportJson(){persistActiveToMemory();repairProject(project);const data=JSON.parse(JSON.stringify(project));data.format='story-patcher-project';data.schemaVersion=1;data.version=VERSION;data.exportedAt=new Date().toISOString();data.works.forEach(w=>{w.expanded=w._open!==false;w.docs.forEach(d=>{d.html=d.body||'';});});downloadFile(JSON.stringify(data,null,2),`Story_Patcher_프로젝트_${timestamp()}.json`,'application/json;charset=utf-8');markProjectClean();flashSnack('PC·모바일 호환 JSON을 내보냈습니다.');}
+function exportJson(){if(inlineState){flashSnack('먼저 현재 패치를 적용하거나 취소해 주세요.');return;}persistActiveToMemory();repairProject(project);const data=JSON.parse(JSON.stringify(project));data.format='story-patcher-project';data.schemaVersion=1;data.version=VERSION;data.exportedAt=new Date().toISOString();data.works.forEach(w=>{w.expanded=w._open!==false;w.docs.forEach(d=>{d.html=d.body||'';});});downloadFile(JSON.stringify(data,null,2),`Story_Patcher_프로젝트_${timestamp()}.json`,'application/json;charset=utf-8');markProjectClean();flashSnack('PC·모바일 호환 JSON을 내보냈습니다.');}
 function duplicateActiveDoc(){const w=activeWork(),d=activeDoc();if(w&&d)duplicateEpisode(w.id,d.id);}
 async function importTxtFiles(files){
   if(!files.length)return;recordHistory('TXT 원문 불러오기');let w=activeWork();if(!w){w={id:uid('w'),title:'가져온 작품',docs:[],_open:true,lastActiveDocId:null};project.works.push(w);project.activeWorkId=w.id;}
@@ -1407,50 +1441,21 @@ menuSheet.addEventListener('click',e=>{
 });
 
 /* ---------------- editor input and empty-span guard ---------------- */
-let ensureTimer=null;
-function selectionInsideEditable(el){const sel=getSelection();return!!(sel?.rangeCount&&el?.contains(sel.anchorNode)&&el.contains(sel.focusNode));}
-function insertPlainTextAtSelection(value){
-  const el=inlineState?.editable;if(!el)return false;if(!selectionInsideEditable(el))focusEnd(el);
-  const sel=getSelection();if(!sel?.rangeCount)return false;const range=sel.getRangeAt(0);range.deleteContents();const node=document.createTextNode(value);range.insertNode(node);range.setStartAfter(node);range.collapse(true);sel.removeAllRanges();sel.addRange(range);el.classList.remove('is-empty');return true;
-}
-function insertInlineLineBreak(){
-  const el=inlineState?.editable;if(!el)return false;if(!selectionInsideEditable(el))focusEnd(el);
-  const sel=getSelection();if(!sel?.rangeCount)return false;const range=sel.getRangeAt(0);range.deleteContents();
-  const br=document.createElement('br'),marker=document.createTextNode('\u200B');range.insertNode(br);br.after(marker);
-  range.setStart(marker,1);range.collapse(true);sel.removeAllRanges();sel.addRange(range);el.classList.remove('is-empty');return true;
-}
-let inlineBreakStamp=0;
-function handleInlineLineBreak(){
-  const now=performance.now();if(now-inlineBreakStamp<90)return true;inlineBreakStamp=now;const done=insertInlineLineBreak();requestAnimationFrame(recreateEditableIfNeeded);return done;
-}
-editor.addEventListener('beforeinput',e=>{
-  if(!inlineState){
-    if(e.inputType&&(e.inputType.startsWith('insert')||e.inputType.startsWith('delete')))beginTypingHistory();
-    return;
-  }
-  clearTimeout(ensureTimer);
-  if(e.inputType==='insertParagraph'||e.inputType==='insertLineBreak'){
-    e.preventDefault();handleInlineLineBreak();return;
-  }
-  const deleting=e.inputType&&e.inputType.startsWith('delete');
-  if(deleting&&inlineState.editable){
-    const sel=getSelection(),value=editableValue(inlineState.editable),inside=selectionInsideEditable(inlineState.editable);
-    if(inside&&sel.isCollapsed&&!value){e.preventDefault();requestAnimationFrame(()=>focusEnd(inlineState.editable));}
-  }
+function inlineTextareaEvent(event){return isInlineTextarea(event?.target);}
+editor.addEventListener('beforeinput',event=>{
+  if(inlineTextareaEvent(event))return; // Native textarea owns IME, Enter, deletion and selection.
+  if(!inlineState&&event.inputType&&(event.inputType.startsWith('insert')||event.inputType.startsWith('delete')))beginTypingHistory();
 });
-editor.addEventListener('input',()=>{
+editor.addEventListener('input',event=>{
+  if(inlineTextareaEvent(event)){autoSizeInlineTextarea(event.target);updateCharCount();return;}
   updateCharCount();
-  if(inlineState){clearTimeout(ensureTimer);ensureTimer=setTimeout(recreateEditableIfNeeded,0);}
-  else scheduleSave();
+  if(!inlineState)scheduleSave();
 });
-editor.addEventListener('keydown',e=>{
+editor.addEventListener('keydown',event=>{
+  if(inlineTextareaEvent(event))return;
   if(!inlineState)return;
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){
-    e.preventDefault();const r=document.createRange();r.selectNodeContents(inlineState.editable);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);return;
-  }
-  if(e.key==='Escape'){e.preventDefault();cancelInline();return;}
-  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();confirmInline();return;}
-  if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing){e.preventDefault();handleInlineLineBreak();}
+  if(event.key==='Escape'){event.preventDefault();cancelInline();return;}
+  if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();confirmInline();}
 });
 editor.addEventListener('blur',()=>{/* explicit confirm/cancel only */});
 
@@ -1463,7 +1468,7 @@ function boot(){
 boot();
 
 // Small test surface used only by automated checks; harmless in normal use.
-window.__STORY_PATCHER_TEST__={finalText:()=>finalTextFrom(editor),aiText:buildAiText,getProject:()=>project,normalizeProjectData:data=>normalizeProject(data),applyProjectData:data=>{project=normalizeProject(data);normalizeMobileLibraryOpenState(project.activeWorkId);loadActiveIntoEditor();return projectSummary(project);},openPreview,annotationsInRange,duplicateWork,duplicateEpisode,openReference,closeReference,startAdd,startMemo,startModify,startSuggest,refreshSelectionState,handleInlineLineBreak,inline:()=>inlineState?{mode:inlineState.mode,editableText:editableValue(inlineState.editable),targetText:inlineState.target?.textContent,editableConnected:inlineState.editable?.isConnected,targetConnected:inlineState.target?.isConnected}:null,confirm:confirmInline,cancel:cancelInline};
+window.__STORY_PATCHER_TEST__={finalText:()=>finalTextFrom(editor),aiText:buildAiText,getProject:()=>project,normalizeProjectData:data=>normalizeProject(data),applyProjectData:data=>{project=normalizeProject(data);normalizeMobileLibraryOpenState(project.activeWorkId);loadActiveIntoEditor();return projectSummary(project);},openPreview,annotationsInRange,duplicateWork,duplicateEpisode,openReference,closeReference,startAdd,startMemo,startModify,startSuggest,refreshSelectionState,inline:()=>inlineState?{mode:inlineState.mode,editableText:editableValue(inlineState.editable),editableTag:inlineState.editable?.tagName,targetText:inlineState.target?.textContent,editableConnected:inlineState.editable?.isConnected,targetConnected:inlineState.target?.isConnected}:null,confirm:confirmInline,cancel:cancelInline,autosize:autoSizeInlineTextarea};
 })();
 </script>
 </body>
