@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Story Patcher · Mobile v0.4.2</title>
+<title>Story Patcher · Mobile v0.4.3</title>
 <style>
 :root{
   --bg:#faf8f5; --paper:#fffdfb; --ink:#2b2620; --sub:#7d7568; --line:#e7e1d6;
@@ -88,16 +88,30 @@ body{
 /* ---------- PATCH floating button + radial ---------- */
 .patch-fab{
   position:absolute; left:0; top:0; width:56px; height:56px;
-  border-radius:50%; border:none; background:var(--accent); color:var(--accent-ink);
-  font-size:13px; font-weight:800; letter-spacing:.02em; box-shadow:0 6px 16px rgba(181,72,46,.4);
+  border-radius:50%; border:1px solid rgba(255,255,255,.28); background:var(--accent); color:var(--accent-ink);
+  font-size:13px; font-weight:800; letter-spacing:.02em; box-shadow:0 5px 14px rgba(73,49,39,.20);
   z-index:30; display:flex; align-items:center;justify-content:center; cursor:pointer;
-  transform:translate(-50%,-50%); transition:left .2s ease,top .2s ease,transform .15s ease,opacity .15s ease;
+  transform:translate(-50%,-50%); opacity:.54;
+  transition:left .2s ease,top .2s ease,transform .15s ease,opacity .2s ease,box-shadow .2s ease;
   touch-action:none;user-select:none;-webkit-user-select:none;
+  -webkit-backdrop-filter:blur(8px) saturate(1.08);backdrop-filter:blur(8px) saturate(1.08);
 }
-.patch-fab.disabled{background:#c7bfae;box-shadow:none}
+.patch-fab .patch-label{pointer-events:none}
+.patch-fab .patch-lock{
+  position:absolute;right:-5px;top:-6px;min-width:25px;height:25px;padding:0 4px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;background:rgba(255,253,251,.94);color:#51483d;
+  border:1px solid rgba(86,73,61,.16);box-shadow:0 4px 11px rgba(29,24,20,.18);
+  font-size:13px;line-height:1;opacity:0;transform:scale(.72);pointer-events:none;
+  transition:opacity .15s ease,transform .15s ease;
+}
+.patch-fab.awake,.patch-fab.open,.patch-fab.dragging,.patch-fab:active,.patch-fab:focus-visible{
+  opacity:1;box-shadow:0 7px 18px rgba(181,72,46,.40);
+}
+.patch-fab.disabled{background:#c7bfae;box-shadow:none;opacity:.38}
 .patch-fab.open{transform:translate(-50%,-50%) scale(.94)}
 .patch-fab.dragging{transform:translate(-50%,-50%) scale(1.08);box-shadow:0 10px 24px rgba(181,72,46,.46);transition:none}
-.patch-fab.auto-avoiding{transition:left .16s ease,top .16s ease,transform .15s ease}
+.patch-fab.dragging .patch-lock,.patch-fab.just-locked .patch-lock{opacity:1;transform:scale(1)}
+.patch-fab.auto-avoiding{transition:left .16s ease,top .16s ease,transform .15s ease,opacity .2s ease}
 .radial-menu{position:absolute;inset:0;z-index:29;pointer-events:none}
 .radial-menu.show{pointer-events:auto}
 .radial-item{
@@ -137,19 +151,23 @@ body{
 
 /* ---------- snackbar ---------- */
 .snackbar{
-  position:absolute; left:14px; right:14px; bottom:14px; z-index:210;
-  max-width:430px; margin:0 auto;
-  background:rgba(43,38,32,.78); color:#fffaf2;
-  border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:11px 14px; font-size:13px;
-  display:flex; justify-content:space-between; align-items:center; gap:12px;
-  box-shadow:0 8px 24px rgba(24,20,16,.18);
-  -webkit-backdrop-filter:blur(14px) saturate(1.15); backdrop-filter:blur(14px) saturate(1.15);
-  transform:translateY(16px); opacity:0; pointer-events:none; transition:transform .2s ease,opacity .2s ease,bottom .18s ease;
+  --snack-bottom:14px;
+  position:absolute; left:50%; right:auto; bottom:var(--snack-bottom); z-index:210;
+  width:max-content; max-width:calc(100% - 28px); min-width:0;
+  background:rgba(55,51,46,.69); color:#fffdf8;
+  border:1px solid rgba(255,255,255,.18); border-radius:13px; padding:9px 13px; font-size:13px;
+  display:flex; justify-content:center; align-items:center; gap:12px;
+  box-shadow:0 8px 24px rgba(24,20,16,.16);
+  -webkit-backdrop-filter:blur(16px) saturate(1.12); backdrop-filter:blur(16px) saturate(1.12);
+  transform:translate(-50%,16px); opacity:0; pointer-events:none;
+  transition:transform .2s ease,opacity .2s ease,width .15s ease;
 }
-.snackbar.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.snackbar.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.snackbar.toast-only{justify-content:center}
+.snackbar.has-undo{width:min(430px,calc(100% - 28px));justify-content:space-between;padding:11px 14px}
+.snackbar span{min-width:0;overflow-wrap:anywhere}
 .snackbar button{background:transparent;border:none;color:#ffd1c2;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
-#device.inline-active .snackbar{bottom:72px}
-#device.preview-mode .snackbar{bottom:calc(78px + var(--safe-b));visibility:visible!important;pointer-events:auto!important}
+#device.preview-mode .snackbar{visibility:visible!important;pointer-events:auto!important}
 
 /* ---------- bottom drawer (management) ---------- */
 .scrim{position:absolute;inset:0;background:rgba(20,17,12,.42);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -345,9 +363,9 @@ body{
 
       <div class="radial-scrim" id="radialScrim"></div>
       <div class="radial-menu" id="radialMenu"></div>
-      <button class="patch-fab" id="patchFab">PATCH</button>
+      <button class="patch-fab" id="patchFab" aria-label="PATCH 메뉴"><span class="patch-label">PATCH</span><span class="patch-lock" id="patchLockBadge" aria-hidden="true">🔒</span></button>
 
-      <div class="snackbar" id="snackbar">
+      <div class="snackbar" id="snackbar" role="status" aria-live="polite">
         <span id="snackbarText"></span>
         <button id="snackbarUndo">실행취소</button>
       </div>
@@ -444,7 +462,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const cleanEditableText=s=>String(s??'').replace(/[\u200B\u2060]/g,'');
 
 const editor=$('#editor'), paperScroll=$('#paperScroll'), stage=$('#stage'), device=$('#device');
-const patchFab=$('#patchFab'), radialMenu=$('#radialMenu'), radialScrim=$('#radialScrim'), selCount=$('#selCount');
+const patchFab=$('#patchFab'), patchLockBadge=$('#patchLockBadge'), radialMenu=$('#radialMenu'), radialScrim=$('#radialScrim'), selCount=$('#selCount');
 const actionbar=$('#actionbar'), actionbarKind=$('#actionbarKind'), actOriginal=$('#actOriginal'), actCancel=$('#actCancel'), actConfirm=$('#actConfirm');
 const snackbar=$('#snackbar'), snackbarText=$('#snackbarText'), snackbarUndo=$('#snackbarUndo');
 const drawer=$('#drawer'), drawerScrim=$('#drawerScrim'), drawerTitle=$('#drawerTitle'), drawerBody=$('#drawerBody'), drawerFoot=$('#drawerFoot'), drawerCloseBtn=$('#drawerCloseBtn');
@@ -460,7 +478,7 @@ const modalScrim=$('#modalScrim'), modalBox=$('#modalBox');
 const txtImportInput=$('#txtImportInput'), jsonImportInput=$('#jsonImportInput'), txtImportLabel=$('#txtImportLabel'), jsonImportLabel=$('#jsonImportLabel');
 const isTablet=()=>window.innerWidth>=840;
 
-const VERSION='0.4.2';
+const VERSION='0.4.3';
 const PATCH_POSITION_KEY='story_patcher_ui_patch_position';
 const HISTORY_LIMIT=8;
 const ANN_SELECTOR='.modified,.added,.suggestion,.deleted,.memo';
@@ -485,7 +503,7 @@ function syncVisibleViewport(){
     document.documentElement.style.setProperty('--app-height',`${appHeight}px`);
     document.documentElement.style.setProperty('--app-top',`${appTop}px`);
     device.classList.toggle('keyboard-open',keyboardOpen);
-    resetShellScroll();updatePatchPlacement();
+    resetShellScroll();updatePatchPlacement();if(snackbar?.classList.contains('show'))updateSnackPlacement();
   });
 }
 if(window.visualViewport)window.visualViewport.addEventListener('resize',syncVisibleViewport,{passive:true});
@@ -658,7 +676,25 @@ function beginTypingHistory(){
 const PATCH_POSITIONS=['br','bl','mr','ml'];
 let preferredPatchPosition=(()=>{try{const v=localStorage.getItem(PATCH_POSITION_KEY);return PATCH_POSITIONS.includes(v)?v:'br';}catch{return'br';}})();
 let effectivePatchPosition=preferredPatchPosition,patchDragging=false,patchSuppressClick=false,patchLongPressTimer=0;
+let patchIdleTimer=0,patchLockTimer=0;
 function patchPositionLabel(pos){return({br:'오른쪽 아래',bl:'왼쪽 아래',mr:'오른쪽 가운데',ml:'왼쪽 가운데'})[pos]||'오른쪽 아래';}
+function wakePatch(duration=1800){
+  clearTimeout(patchIdleTimer);patchFab.classList.add('awake');
+  if(duration>0)patchIdleTimer=setTimeout(()=>{
+    if(!patchDragging&&!radialMenu.classList.contains('show'))patchFab.classList.remove('awake');
+  },duration);
+}
+function letPatchRest(delay=650){
+  clearTimeout(patchIdleTimer);patchIdleTimer=setTimeout(()=>{
+    if(!patchDragging&&!radialMenu.classList.contains('show'))patchFab.classList.remove('awake');
+  },delay);
+}
+function showPatchLock(state,duration=0){
+  clearTimeout(patchLockTimer);patchLockBadge.textContent=state==='open'?'🔓':'🔒';
+  patchFab.classList.toggle('just-locked',state!=='open');
+  if(state==='open')patchFab.classList.remove('just-locked');
+  if(duration>0)patchLockTimer=setTimeout(()=>patchFab.classList.remove('just-locked'),duration);
+}
 function patchCoords(pos){
   const w=Math.max(120,stage.clientWidth),h=Math.max(180,stage.clientHeight),edge=46;
   if(pos==='bl')return{x:edge,y:h-edge};
@@ -667,14 +703,30 @@ function patchCoords(pos){
   return{x:w-edge,y:h-edge};
 }
 function currentSelectionRect(){try{return selectionMode&&savedRange&&!savedRange.collapsed?savedRange.getBoundingClientRect():null;}catch{return null;}}
+function pointDistanceToRect(point,rect){
+  const dx=Math.max(rect.left-point.x,0,point.x-rect.right);
+  const dy=Math.max(rect.top-point.y,0,point.y-rect.bottom);
+  return Math.hypot(dx,dy);
+}
 function autoPatchPosition(){
   if(patchDragging||radialMenu.classList.contains('show'))return effectivePatchPosition;
-  const rect=currentSelectionRect();if(!rect||!rect.width&&!rect.height)return preferredPatchPosition;
-  const sr=stage.getBoundingClientRect(),cx=rect.left+rect.width/2-sr.left,cy=rect.top+rect.height/2-sr.top;
-  const side=cx>sr.width/2?'l':'r';
-  if(cy>sr.height*.48)return side==='l'?'mr':'ml';
-  const pref=patchCoords(preferredPatchPosition),near=Math.hypot(pref.x-cx,pref.y-cy)<165;
-  return near?(side==='l'?'br':'bl'):preferredPatchPosition;
+  const rect=currentSelectionRect();if(!rect||(!rect.width&&!rect.height))return preferredPatchPosition;
+  const sr=stage.getBoundingClientRect();
+  const local={left:rect.left-sr.left,top:rect.top-sr.top,right:rect.right-sr.left,bottom:rect.bottom-sr.top};
+  const preferred=patchCoords(preferredPatchPosition);
+  // The user's anchored position is sacred. Move only when the selected text is genuinely close to it.
+  if(pointDistanceToRect(preferred,local)>104)return preferredPatchPosition;
+  let best=preferredPatchPosition,bestScore=-Infinity;
+  for(const pos of PATCH_POSITIONS){
+    const c=patchCoords(pos);let score=pointDistanceToRect(c,local);
+    // Prefer a temporary move on the same vertical rail so the button does not make a dramatic jump.
+    const prefMiddle=preferredPatchPosition==='mr'||preferredPatchPosition==='ml';
+    const candMiddle=pos==='mr'||pos==='ml';
+    if(prefMiddle!==candMiddle)score-=18;
+    if(pos===preferredPatchPosition)score-=80;
+    if(score>bestScore){bestScore=score;best=pos;}
+  }
+  return best;
 }
 function updatePatchPlacement(forcePos=null){
   if(!stage||!patchFab)return;
@@ -686,7 +738,8 @@ function updatePatchPlacement(forcePos=null){
 function setPreferredPatchPosition(pos,announce=true){
   if(!PATCH_POSITIONS.includes(pos))return;preferredPatchPosition=pos;effectivePatchPosition=pos;
   try{localStorage.setItem(PATCH_POSITION_KEY,pos);}catch{}
-  updatePatchPlacement(pos);if(announce)flashSnack(`PATCH 버튼을 ${patchPositionLabel(pos)}에 고정했습니다.`);
+  updatePatchPlacement(pos);wakePatch(1400);showPatchLock('locked',850);
+  if(announce)flashSnack(`PATCH 버튼을 ${patchPositionLabel(pos)}에 고정했습니다.`);
 }
 function snapPatchPosition(clientX,clientY){
   const sr=stage.getBoundingClientRect(),x=clientX-sr.left,y=clientY-sr.top;
@@ -695,14 +748,17 @@ function snapPatchPosition(clientX,clientY){
   setPreferredPatchPosition(best,true);
 }
 function openPatchPositionModal(){
-  modalBox.innerHTML=`<h3>PATCH 버튼 위치</h3><select id="patchPositionSelect"><option value="br">오른쪽 아래</option><option value="bl">왼쪽 아래</option><option value="mr">오른쪽 가운데</option><option value="ml">왼쪽 가운데</option></select><p style="font-size:12px;color:var(--sub);line-height:1.55;margin:0 0 12px">PATCH 버튼을 길게 눌러 직접 옮길 수도 있습니다. 선택 영역과 겹치면 잠시 반대편으로 이동합니다.</p><div class="row"><button id="ppCancel">취소</button><button class="primary" id="ppApply">적용</button></div>`;
+  modalBox.innerHTML=`<h3>PATCH 버튼 위치</h3><select id="patchPositionSelect"><option value="br">오른쪽 아래</option><option value="bl">왼쪽 아래</option><option value="mr">오른쪽 가운데</option><option value="ml">왼쪽 가운데</option></select><p style="font-size:12px;color:var(--sub);line-height:1.55;margin:0 0 12px">평소에는 위치가 잠겨 있습니다. PATCH를 길게 누르면 🔓 표시와 함께 이동할 수 있고, 손을 떼면 가장 가까운 위치에 자동으로 🔒 고정됩니다. 선택 영역과 실제로 겹칠 때만 잠시 반대편으로 피했다가 원래 자리로 돌아옵니다.</p><div class="row"><button id="ppCancel">취소</button><button class="primary" id="ppApply">적용</button></div>`;
   modalScrim.classList.add('show');const select=$('#patchPositionSelect',modalBox);select.value=preferredPatchPosition;
   $('#ppCancel',modalBox).onclick=closeModal;$('#ppApply',modalBox).onclick=()=>{setPreferredPatchPosition(select.value,true);closeModal();};
 }
 function beginPatchDragPointer(event){
   if(inlineState||drawer.classList.contains('show')||previewScreen.classList.contains('show'))return;
-  capturePatchContext();patchContextLocked=true;clearTimeout(patchLongPressTimer);patchSuppressClick=false;
-  patchLongPressTimer=setTimeout(()=>{patchDragging=true;patchSuppressClick=true;closeRadial();patchFab.classList.add('dragging');try{patchFab.setPointerCapture(event.pointerId);}catch{};navigator.vibrate?.(15);},420);
+  wakePatch(0);capturePatchContext();patchContextLocked=true;clearTimeout(patchLongPressTimer);patchSuppressClick=false;
+  patchLongPressTimer=setTimeout(()=>{
+    patchDragging=true;patchSuppressClick=true;closeRadial();patchFab.classList.add('dragging');showPatchLock('open');
+    try{patchFab.setPointerCapture(event.pointerId);}catch{};navigator.vibrate?.(15);
+  },420);
 }
 function movePatchDragPointer(event){
   if(!patchDragging)return;event.preventDefault();const sr=stage.getBoundingClientRect(),r=28;
@@ -711,7 +767,7 @@ function movePatchDragPointer(event){
 }
 function endPatchDragPointer(event){
   clearTimeout(patchLongPressTimer);
-  if(!patchDragging)return;
+  if(!patchDragging){letPatchRest(1000);return;}
   patchDragging=false;patchFab.classList.remove('dragging');snapPatchPosition(event.clientX,event.clientY);patchContextLocked=false;
   setTimeout(()=>{patchSuppressClick=false;},120);
 }
@@ -937,7 +993,7 @@ function annotationsInRange(range){
   $all(ANN_SELECTOR,editor).forEach(el=>{try{if(range.intersectsNode(el))found.add(el);}catch{}});return[...found];
 }
 function clearSavedSelection(){selectionMode=false;selectionPreserved=false;selectedText='';selectedAnnotations=[];savedRange=null;selCount.style.display='none';updatePatchPlacement();}
-function closeRadial(){radialMenu.classList.remove('show');radialMenu.innerHTML='';radialScrim.classList.remove('show');patchFab.classList.remove('open');patchContextLocked=false;updatePatchPlacement();}
+function closeRadial(){radialMenu.classList.remove('show');radialMenu.innerHTML='';radialScrim.classList.remove('show');patchFab.classList.remove('open');patchContextLocked=false;updatePatchPlacement();letPatchRest();}
 function fanPositions(n,pos){
   const left=pos==='bl'||pos==='ml',middle=pos==='mr'||pos==='ml',sx=left?1:-1;
   let pts;
@@ -961,7 +1017,7 @@ function buildRadial(items){
     b.innerHTML=`<span class="dot"></span>${esc(it.label)}`;
     b.addEventListener('pointerdown',e=>e.preventDefault());b.addEventListener('click',()=>{closeRadial();it.onSelect();});radialMenu.appendChild(b);
   });
-  positionRadialItems();radialMenu.classList.add('show');radialScrim.classList.add('show');patchFab.classList.add('open');
+  positionRadialItems();radialMenu.classList.add('show');radialScrim.classList.add('show');patchFab.classList.add('open');wakePatch(0);
 }
 function refreshSelectionState(){
   if(inlineState)return;const sel=getSelection();
@@ -982,12 +1038,12 @@ function capturePatchContext(){
   updatePatchPlacement();
 }
 document.addEventListener('selectionchange',()=>{if(inlineState||patchContextLocked)return;refreshSelectionState();});
-patchFab.addEventListener('pointerdown',event=>{event.preventDefault();beginPatchDragPointer(event);});
+patchFab.addEventListener('pointerdown',event=>{event.preventDefault();wakePatch(0);beginPatchDragPointer(event);});
 document.addEventListener('pointermove',movePatchDragPointer,{passive:false});
 document.addEventListener('pointerup',endPatchDragPointer,{passive:true});
 document.addEventListener('pointercancel',endPatchDragPointer,{passive:true});
 patchFab.addEventListener('click',()=>{
-  clearTimeout(patchLongPressTimer);if(patchSuppressClick||patchDragging)return;
+  clearTimeout(patchLongPressTimer);if(patchSuppressClick||patchDragging)return;wakePatch(2000);
   if(radialMenu.classList.contains('show')){closeRadial();return;}
   capturePatchContext();
   if(savedSelectionIsUsable()){
@@ -1085,9 +1141,9 @@ function continueEditingAfter(el){
 function showActionbar(kind){
   const labels={modify:'수정',add:'추가',suggest:'제안',memo:'메모'};actionbarKind.textContent=labels[kind]||kind;
   actConfirm.textContent=kind==='add'?'추가':kind==='modify'?'적용':'저장';actOriginal.style.display=kind==='modify'?'inline-block':'none';
-  actionbar.classList.add('show');device.classList.add('inline-active');patchFab.style.display='none';selCount.style.display='none';
+  actionbar.classList.add('show');device.classList.add('inline-active');patchFab.style.display='none';requestAnimationFrame(updateSnackPlacement);selCount.style.display='none';
 }
-function hideActionbar(){actionbar.classList.remove('show');device.classList.remove('inline-active');patchFab.style.display='flex';actOriginal.textContent='원문 보기';updatePatchPlacement();}
+function hideActionbar(){actionbar.classList.remove('show');device.classList.remove('inline-active');patchFab.style.display='flex';actOriginal.textContent='원문 보기';updatePatchPlacement();requestAnimationFrame(updateSnackPlacement);}
 function bindInlineTextarea(el){
   if(!isInlineTextarea(el)||el.dataset.bound==='1')return el;
   el.dataset.bound='1';
@@ -1231,9 +1287,9 @@ function confirmInline(){
 function openDrawer(){
   closeRadial();try{document.activeElement?.blur();}catch{};try{getSelection().removeAllRanges();}catch{};
   selectionPreserved=false;drawer.classList.add('show');drawerScrim.classList.add('show');drawer.setAttribute('aria-hidden','false');patchFab.style.display='none';
-  requestAnimationFrame(()=>{try{drawer.focus({preventScroll:true});}catch{drawer.focus();}});
+  requestAnimationFrame(()=>{try{drawer.focus({preventScroll:true});}catch{drawer.focus();}updateSnackPlacement();});setTimeout(updateSnackPlacement,240);
 }
-function closeDrawer(){drawer.classList.remove('show');drawerScrim.classList.remove('show');drawer.setAttribute('aria-hidden','true');if(!inlineState)patchFab.style.display='flex';resetShellScroll();updatePatchPlacement();}
+function closeDrawer(){drawer.classList.remove('show');drawerScrim.classList.remove('show');drawer.setAttribute('aria-hidden','true');if(!inlineState)patchFab.style.display='flex';resetShellScroll();updatePatchPlacement();requestAnimationFrame(updateSnackPlacement);setTimeout(updateSnackPlacement,240);}
 drawerCloseBtn.onclick=closeDrawer;drawerScrim.onclick=closeDrawer;
 let annotationPointerTarget=null;
 function annotationFromEvent(event){const el=event.target.closest?.(ANN_SELECTOR);return el&&editor.contains(el)&&!el.classList.contains('pending-edit')?el:null;}
@@ -1298,13 +1354,39 @@ function openDeletedDrawer(el){
   $('#dlPurge').onclick=()=>{closeDrawer();showConfirmModal('완전 삭제','원문을 되돌릴 수 없이 영구히 제거합니다. 계속할까요?','완전 삭제',()=>{recordHistory('완전 삭제');el.remove();editor.normalize();scheduleSave();updateCharCount();flashSnack('완전히 삭제했습니다.');},true);};
 }
 
-/* ---------------- snackbar ---------------- */
+/* ---------------- toast / undo snackbar ---------------- */
 let snackTimer=null,snackUndoFn=null;
-function flashSnack(msg,undoFn){
-  snackbarText.textContent=msg;snackUndoFn=typeof undoFn==='function'?undoFn:null;snackbarUndo.style.display=snackUndoFn?'inline-block':'none';
-  snackbar.classList.add('show');clearTimeout(snackTimer);snackTimer=setTimeout(()=>snackbar.classList.remove('show'),snackUndoFn?4600:2100);
+function updateSnackPlacement(){
+  if(!snackbar)return;
+  let bottom=14;
+  if(drawer.classList.contains('show')){
+    const sr=stage.getBoundingClientRect(),dr=drawer.getBoundingClientRect();
+    bottom=Math.max(bottom,Math.max(0,sr.bottom-dr.top)+16);
+  }else if(device.classList.contains('inline-active')){
+    bottom=Math.max(bottom,(actionbar.offsetHeight||58)+12);
+  }else if(device.classList.contains('preview-mode')){
+    const foot=$('.preview-foot');bottom=Math.max(bottom,(foot?.offsetHeight||66)+12);
+  }
+  const maxBottom=Math.max(14,stage.clientHeight-(snackbar.offsetHeight||48)-12);
+  snackbar.style.setProperty('--snack-bottom',`${Math.min(bottom,maxBottom)}px`);
 }
-snackbarUndo.onclick=()=>{snackbar.classList.remove('show');const fn=snackUndoFn;snackUndoFn=null;if(fn)fn();};
+function hideSnack(){
+  clearTimeout(snackTimer);snackbar.classList.remove('show');snackUndoFn=null;
+  setTimeout(()=>{snackbar.classList.remove('has-undo','toast-only');},210);
+}
+function flashSnack(msg,undoFn){
+  const hasUndo=typeof undoFn==='function';
+  snackbarText.textContent=msg;snackUndoFn=hasUndo?undoFn:null;snackbarUndo.style.display=hasUndo?'inline-block':'none';
+  snackbar.classList.toggle('has-undo',hasUndo);snackbar.classList.toggle('toast-only',!hasUndo);
+  snackbar.classList.add('show');clearTimeout(snackTimer);
+  requestAnimationFrame(updateSnackPlacement);setTimeout(updateSnackPlacement,240);
+  snackTimer=setTimeout(hideSnack,hasUndo?4300:1900);
+}
+snackbarUndo.onclick=()=>{const fn=snackUndoFn;hideSnack();if(fn)fn();};
+if('ResizeObserver' in window){
+  const snackObserver=new ResizeObserver(()=>{if(snackbar.classList.contains('show'))updateSnackPlacement();});
+  snackObserver.observe(drawer);snackObserver.observe(actionbar);const previewFoot=$('.preview-foot');if(previewFoot)snackObserver.observe(previewFoot);
+}
 
 /* ---------------- preview ---------------- */
 let previewPlainText='';
@@ -1316,7 +1398,7 @@ function updatePreviewScrollbar(){
   const thumb=Math.max(28,track*(visible/total)),max=Math.max(0,track-thumb),top=max*(previewBody.scrollTop/Math.max(1,total-visible));
   previewScrollThumb.style.height=`${thumb}px`;previewScrollThumb.style.transform=`translateY(${top}px)`;
 }
-function closePreview(){previewScreen.classList.remove('show');device.classList.remove('preview-mode');previewBody.scrollTop=0;updatePatchPlacement();}
+function closePreview(){previewScreen.classList.remove('show');device.classList.remove('preview-mode');previewBody.scrollTop=0;updatePatchPlacement();requestAnimationFrame(updateSnackPlacement);}
 function openPreview(){
   if(inlineState){flashSnack('먼저 현재 패치를 적용하거나 취소해 주세요.');return;}
   persistActiveToMemory();closeRadial();closeDrawer();closeLibraryActionSheet();menuSheet.classList.remove('show');editor.blur();try{getSelection().removeAllRanges();}catch{}
@@ -1463,7 +1545,7 @@ editor.addEventListener('blur',()=>{/* explicit confirm/cancel only */});
 function boot(){
   syncVisibleViewport();
   repairProject(project);normalizeMobileLibraryOpenState();loadActiveIntoEditor();clearHistory();updateSaveStatus();if(isTablet())libPanel.classList.add('show');renderReference();
-  requestAnimationFrame(()=>{syncVisibleViewport();updatePatchPlacement(preferredPatchPosition);});
+  requestAnimationFrame(()=>{syncVisibleViewport();updatePatchPlacement(preferredPatchPosition);wakePatch(1200);});
 }
 boot();
 
